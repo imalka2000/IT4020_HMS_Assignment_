@@ -5,24 +5,24 @@ import {
   FlaskConical, LayoutDashboard, Search, Bell, Activity
 } from "lucide-react";
 import Dashboard    from "./pages/Dashboard";
-import Patients     from "./patient/patients";
-import PatientCreate from "./patient/patient-create";
-import PatientView   from "./patient/patient-view";
-import Doctors       from "./doctor/doctors";
-import DoctorCreate  from "./doctor/doctor-create";
-import DoctorView    from "./doctor/doctor-view";
-import Appointments      from "./appointment/appointments";
-import AppointmentCreate from "./appointment/appointment-create";
-import AppointmentView   from "./appointment/appointment-view";
-import Pharmacy      from "./pharmacy/pharmacy";
-import PharmacyCreate from "./pharmacy/pharmacy-create";
-import PharmacyView   from "./pharmacy/pharmacy-view";
-import Billing      from "./billing/bills";
-import BillCreate   from "./billing/bill-create";
-import BillView     from "./billing/bill-view";
-import LabTests      from "./labtest/labtests";
-import LabTestCreate from "./labtest/labtest-create";
-import LabTestView   from "./labtest/labtest-view";
+import Patients     from "./pages/patient/patients";
+import PatientCreate from "./pages/patient/patient-create";
+import PatientView   from "./pages/patient/patient-view";
+import Doctors       from "./pages/doctor/doctors";
+import DoctorCreate  from "./pages/doctor/doctor-create";
+import DoctorView    from "./pages/doctor/doctor-view";
+import Appointments      from "./pages/appointment/appointments";
+import AppointmentCreate from "./pages/appointment/appointment-create";
+import AppointmentView   from "./pages/appointment/appointment-view";
+import Pharmacy      from "./pages/pharmacy/pharmacy";
+import PharmacyCreate from "./pages/pharmacy/pharmacy-create";
+import PharmacyView   from "./pages/pharmacy/pharmacy-view";
+import Billing      from "./pages/billing/bills";
+import BillCreate   from "./pages/billing/bill-create";
+import BillView     from "./pages/billing/bill-view";
+import LabTests      from "./pages/labtest/labtests";
+import LabTestCreate from "./pages/labtest/labtest-create";
+import LabTestView   from "./pages/labtest/labtest-view";
 import "./App.css";
 
 const NAV = [

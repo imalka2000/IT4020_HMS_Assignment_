@@ -2,9 +2,9 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Table, Button, Form, InputGroup } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { Search, Plus, RotateCcw } from "lucide-react";
-import { appointmentAPI, patientAPI, doctorAPI } from "../services/api";
-import useCRUD from "../hooks/useCRUD";
-import CardContainer from "../components/CardContainer";
+import { appointmentAPI, patientAPI, doctorAPI } from "../../services/api";
+import useCRUD from "../../hooks/useCRUD";
+import CardContainer from "../../components/CardContainer";
 
 export default function Appointments({ search: topSearch = "" }) {
   const navigate = useNavigate();

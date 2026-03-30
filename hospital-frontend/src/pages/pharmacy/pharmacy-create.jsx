@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { patientAPI } from "../services/api";
-import PatientForm from "./components/patient-form";
-import CardContainer from "../components/CardContainer";
+import { pharmacyAPI } from "../../services/api";
+import PharmacyForm from "./components/pharmacy-form";
+import CardContainer from "../../components/CardContainer";
 
-const PatientCreate = () => {
+const PharmacyCreate = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const handleSave = async (data) => {
     setLoading(true);
     try {
-      await patientAPI.create(data);
-      toast.success("Patient registered successfully");
-      setTimeout(() => navigate("/patients"), 1500);
+      await pharmacyAPI.create(data);
+      toast.success("Medicine added successfully");
+      setTimeout(() => navigate("/pharmacy"), 1500);
     } catch (error) {
-      toast.error(error.message || "Failed to register patient");
+      toast.error(error.message || "Failed to add medicine");
     } finally {
       setLoading(false);
     }
@@ -25,14 +25,14 @@ const PatientCreate = () => {
   return (
     <>
       <div className="container-fluid mb-3">
-        <h4 className="fw-bold px-2">Register New Patient</h4>
+        <h4 className="fw-bold px-2">Add New Medicine</h4>
       </div>
       <CardContainer>
-        <PatientForm onSubmit={handleSave} isLoading={loading} />
+        <PharmacyForm onSubmit={handleSave} isLoading={loading} />
       </CardContainer>
       <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 };
 
-export default PatientCreate;
+export default PharmacyCreate;

@@ -2,30 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { patientAPI } from "../services/api";
-import PatientForm from "./components/patient-form";
-import CardContainer from "../components/CardContainer";
+import { billingAPI } from "../../services/api";
+import BillsForm from "./components/bills-form";
+import CardContainer from "../../components/CardContainer";
 
-const PatientView = () => {
+const BillView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [patient, setPatient] = useState(null);
+  const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchPatient();
+    fetchBill();
   }, [id]);
 
-  const fetchPatient = async () => {
+  const fetchBill = async () => {
     setLoading(true);
     try {
-      const data = await patientAPI.getById(id);
-      setPatient(data);
+      const data = await billingAPI.getById(id);
+      setBill(data);
     } catch (error) {
-      toast.error("Failed to load patient details");
+      toast.error("Failed to load bill details");
     } finally {
       setLoading(false);
     }
@@ -34,12 +34,17 @@ const PatientView = () => {
   const handleUpdate = async (data) => {
     setIsSaving(true);
     try {
-      await patientAPI.update(id, data);
-      toast.success("Patient updated successfully");
+      await billingAPI.update(id, {
+        ...data,
+        patientId: parseInt(data.patientId),
+        appointmentId: data.appointmentId ? parseInt(data.appointmentId) : null,
+        amount: parseFloat(data.amount)
+      });
+      toast.success("Bill updated successfully");
       setIsEditable(false);
-      fetchPatient();
+      fetchBill();
     } catch (error) {
-      toast.error("Failed to update patient");
+      toast.error("Failed to update bill");
     } finally {
       setIsSaving(false);
     }
@@ -47,35 +52,34 @@ const PatientView = () => {
 
   const handleDelete = async () => {
     try {
-      await patientAPI.delete(id);
-      toast.success("Patient deleted successfully");
-      navigate("/patients");
+      await billingAPI.delete(id);
+      toast.success("Bill deleted successfully");
+      navigate("/billing");
     } catch (error) {
-      toast.error("Failed to delete patient");
+      toast.error("Failed to delete bill");
       setShowDeleteModal(false);
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading patient details...</div>;
-  if (!patient) return <div className="p-4 text-center">Patient not found</div>;
+  if (loading) return <div className="p-4 text-center">Loading bill details...</div>;
+  if (!bill) return <div className="p-4 text-center">Bill not found</div>;
 
   return (
     <>
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">{patient.firstName} {patient.lastName}</h4>
-            <span className="text-muted small">Patient ID: #{patient.id}</span>
+            <h4 className="fw-bold mt-2">Bill #{bill.id}</h4>
           </Col>
-          <Col md={6} className="d-flex justify-content-end align-items-center">
+          <Col md={6} className="d-flex justify-content-end">
             {!isEditable && (
               <Dropdown align="end">
                 <Dropdown.Toggle variant="white" className="border-0 p-0 shadow-none">
                   <i className="bi bi-three-dots-vertical fs-5"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/patients/create">
-                    <i className="bi bi-plus-circle me-2"></i> Register New Patient
+                  <Dropdown.Item as={Link} to="/billing/create">
+                    <i className="bi bi-plus-circle me-2"></i> Create New Bill
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => setIsEditable(true)}>
                     <i className="bi bi-pencil-square me-2"></i> Edit
@@ -89,8 +93,8 @@ const PatientView = () => {
           </Col>
         </Row>
 
-        <PatientForm 
-          patientData={patient} 
+        <BillsForm 
+          billData={bill} 
           isViewMode={true} 
           isEditable={isEditable} 
           onCancelEdit={() => setIsEditable(false)}
@@ -104,7 +108,7 @@ const PatientView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete patient <b>{patient.firstName} {patient.lastName}</b>?
+          Are you sure you want to delete bill <b>#{bill.id}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -117,4 +121,4 @@ const PatientView = () => {
   );
 };
 
-export default PatientView;
+export default BillView;

@@ -2,30 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { doctorAPI } from "../services/api";
-import DoctorForm from "./components/doctor-form";
-import CardContainer from "../components/CardContainer";
+import { patientAPI } from "../../services/api";
+import PatientForm from "./components/patient-form";
+import CardContainer from "../../components/CardContainer";
 
-const DoctorView = () => {
+const PatientView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [doctor, setDoctor] = useState(null);
+  const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchDoctor();
+    fetchPatient();
   }, [id]);
 
-  const fetchDoctor = async () => {
+  const fetchPatient = async () => {
     setLoading(true);
     try {
-      const data = await doctorAPI.getById(id);
-      setDoctor(data);
+      const data = await patientAPI.getById(id);
+      setPatient(data);
     } catch (error) {
-      toast.error("Failed to load doctor details");
+      toast.error("Failed to load patient details");
     } finally {
       setLoading(false);
     }
@@ -34,12 +34,12 @@ const DoctorView = () => {
   const handleUpdate = async (data) => {
     setIsSaving(true);
     try {
-      await doctorAPI.update(id, data);
-      toast.success("Doctor updated successfully");
+      await patientAPI.update(id, data);
+      toast.success("Patient updated successfully");
       setIsEditable(false);
-      fetchDoctor();
+      fetchPatient();
     } catch (error) {
-      toast.error("Failed to update doctor");
+      toast.error("Failed to update patient");
     } finally {
       setIsSaving(false);
     }
@@ -47,25 +47,25 @@ const DoctorView = () => {
 
   const handleDelete = async () => {
     try {
-      await doctorAPI.delete(id);
-      toast.success("Doctor deleted successfully");
-      navigate("/doctors");
+      await patientAPI.delete(id);
+      toast.success("Patient deleted successfully");
+      navigate("/patients");
     } catch (error) {
-      toast.error("Failed to delete doctor");
+      toast.error("Failed to delete patient");
       setShowDeleteModal(false);
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading doctor details...</div>;
-  if (!doctor) return <div className="p-4 text-center">Doctor not found</div>;
+  if (loading) return <div className="p-4 text-center">Loading patient details...</div>;
+  if (!patient) return <div className="p-4 text-center">Patient not found</div>;
 
   return (
     <>
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">Dr. {doctor.firstName} {doctor.lastName}</h4>
-            <span className="text-muted small">{doctor.specialization} · {doctor.department}</span>
+            <h4 className="fw-bold mt-2">{patient.firstName} {patient.lastName}</h4>
+            <span className="text-muted small">Patient ID: #{patient.id}</span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (
@@ -74,8 +74,8 @@ const DoctorView = () => {
                   <i className="bi bi-three-dots-vertical fs-5"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/doctors/create">
-                    <i className="bi bi-plus-circle me-2"></i> Add New Doctor
+                  <Dropdown.Item as={Link} to="/patients/create">
+                    <i className="bi bi-plus-circle me-2"></i> Register New Patient
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => setIsEditable(true)}>
                     <i className="bi bi-pencil-square me-2"></i> Edit
@@ -89,8 +89,8 @@ const DoctorView = () => {
           </Col>
         </Row>
 
-        <DoctorForm 
-          doctorData={doctor} 
+        <PatientForm 
+          patientData={patient} 
           isViewMode={true} 
           isEditable={isEditable} 
           onCancelEdit={() => setIsEditable(false)}
@@ -104,7 +104,7 @@ const DoctorView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete <b>Dr. {doctor.firstName} {doctor.lastName}</b>?
+          Are you sure you want to delete patient <b>{patient.firstName} {patient.lastName}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -117,4 +117,4 @@ const DoctorView = () => {
   );
 };
 
-export default DoctorView;
+export default PatientView;

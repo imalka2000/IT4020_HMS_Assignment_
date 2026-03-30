@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { billingAPI } from "../services/api";
+import { billingAPI } from "../../services/api";
 import BillsForm from "./components/bills-form";
-import CardContainer from "../components/CardContainer";
+import CardContainer from "../../components/CardContainer";
 
 const BillCreate = () => {
   const navigate = useNavigate();

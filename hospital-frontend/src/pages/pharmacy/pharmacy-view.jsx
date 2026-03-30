@@ -2,38 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { appointmentAPI, patientAPI, doctorAPI } from "../services/api";
-import AppointmentForm from "./components/appointment-form";
-import CardContainer from "../components/CardContainer";
+import { pharmacyAPI } from "../../services/api";
+import PharmacyForm from "./components/pharmacy-form";
+import CardContainer from "../../components/CardContainer";
 
-const AppointmentView = () => {
+const PharmacyView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [appointment, setAppointment] = useState(null);
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchMedicine();
   }, [id]);
 
-  const fetchData = async () => {
+  const fetchMedicine = async () => {
     setLoading(true);
     try {
-      const [apptData, pData, dData] = await Promise.all([
-        appointmentAPI.getById(id),
-        patientAPI.getAll(),
-        doctorAPI.getAll()
-      ]);
-      setAppointment(apptData);
-      setPatients(pData);
-      setDoctors(dData);
+      const data = await pharmacyAPI.getById(id);
+      setMedicine(data);
     } catch (error) {
-      toast.error("Failed to load data");
+      toast.error("Failed to load medicine details");
     } finally {
       setLoading(false);
     }
@@ -42,12 +34,12 @@ const AppointmentView = () => {
   const handleUpdate = async (data) => {
     setIsSaving(true);
     try {
-      await appointmentAPI.update(id, data);
-      toast.success("Appointment updated successfully");
+      await pharmacyAPI.update(id, data);
+      toast.success("Medicine updated successfully");
       setIsEditable(false);
-      fetchData();
+      fetchMedicine();
     } catch (error) {
-      toast.error("Failed to update appointment");
+      toast.error("Failed to update medicine");
     } finally {
       setIsSaving(false);
     }
@@ -55,30 +47,25 @@ const AppointmentView = () => {
 
   const handleDelete = async () => {
     try {
-      await appointmentAPI.delete(id);
-      toast.success("Appointment deleted successfully");
-      navigate("/appointments");
+      await pharmacyAPI.delete(id);
+      toast.success("Medicine deleted successfully");
+      navigate("/pharmacy");
     } catch (error) {
-      toast.error("Failed to delete appointment");
+      toast.error("Failed to delete medicine");
       setShowDeleteModal(false);
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading appointment details...</div>;
-  if (!appointment) return <div className="p-4 text-center">Appointment not found</div>;
+  if (loading) return <div className="p-4 text-center">Loading medicine details...</div>;
+  if (!medicine) return <div className="p-4 text-center">Medicine not found</div>;
 
   return (
     <>
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">Appointment #{appointment.id}</h4>
-            <span className={`badge ${
-              appointment.appointmentStatus === "COMPLETED" ? "bg-success" : 
-              appointment.appointmentStatus === "SCHEDULED" ? "bg-primary" : "bg-danger"
-            }`}>
-              {appointment.appointmentStatus}
-            </span>
+            <h4 className="fw-bold mt-2">{medicine.name}</h4>
+            <span className="text-muted small">{medicine.genericName} · {medicine.category}</span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (
@@ -87,8 +74,8 @@ const AppointmentView = () => {
                   <i className="bi bi-three-dots-vertical fs-5"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/appointments/create">
-                    <i className="bi bi-plus-circle me-2"></i> Schedule New
+                  <Dropdown.Item as={Link} to="/pharmacy/create">
+                    <i className="bi bi-plus-circle me-2"></i> Add New Medicine
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => setIsEditable(true)}>
                     <i className="bi bi-pencil-square me-2"></i> Edit
@@ -102,10 +89,8 @@ const AppointmentView = () => {
           </Col>
         </Row>
 
-        <AppointmentForm 
-          appointmentData={appointment} 
-          patients={patients}
-          doctors={doctors}
+        <PharmacyForm 
+          pharmacyData={medicine} 
           isViewMode={true} 
           isEditable={isEditable} 
           onCancelEdit={() => setIsEditable(false)}
@@ -119,7 +104,7 @@ const AppointmentView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete appointment <b>#{appointment.id}</b>?
+          Are you sure you want to delete <b>{medicine.name}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -132,4 +117,4 @@ const AppointmentView = () => {
   );
 };
 
-export default AppointmentView;
+export default PharmacyView;

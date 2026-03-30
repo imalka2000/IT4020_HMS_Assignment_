@@ -2,30 +2,38 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { labAPI } from "../services/api";
-import LabTestForm from "./components/labtest-form";
-import CardContainer from "../components/CardContainer";
+import { appointmentAPI, patientAPI, doctorAPI } from "../../services/api";
+import AppointmentForm from "./components/appointment-form";
+import CardContainer from "../../components/CardContainer";
 
-const LabTestView = () => {
+const AppointmentView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [test, setTest] = useState(null);
+  const [appointment, setAppointment] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchTest();
+    fetchData();
   }, [id]);
 
-  const fetchTest = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await labAPI.getById(id);
-      setTest(data);
+      const [apptData, pData, dData] = await Promise.all([
+        appointmentAPI.getById(id),
+        patientAPI.getAll(),
+        doctorAPI.getAll()
+      ]);
+      setAppointment(apptData);
+      setPatients(pData);
+      setDoctors(dData);
     } catch (error) {
-      toast.error("Failed to load test details");
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -34,12 +42,12 @@ const LabTestView = () => {
   const handleUpdate = async (data) => {
     setIsSaving(true);
     try {
-      await labAPI.update(id, data);
-      toast.success("Test updated successfully");
+      await appointmentAPI.update(id, data);
+      toast.success("Appointment updated successfully");
       setIsEditable(false);
-      fetchTest();
+      fetchData();
     } catch (error) {
-      toast.error("Failed to update test");
+      toast.error("Failed to update appointment");
     } finally {
       setIsSaving(false);
     }
@@ -47,25 +55,30 @@ const LabTestView = () => {
 
   const handleDelete = async () => {
     try {
-      await labAPI.delete(id);
-      toast.success("Test deleted successfully");
-      navigate("/labtests");
+      await appointmentAPI.delete(id);
+      toast.success("Appointment deleted successfully");
+      navigate("/appointments");
     } catch (error) {
-      toast.error("Failed to delete test");
+      toast.error("Failed to delete appointment");
       setShowDeleteModal(false);
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading test details...</div>;
-  if (!test) return <div className="p-4 text-center">Test not found</div>;
+  if (loading) return <div className="p-4 text-center">Loading appointment details...</div>;
+  if (!appointment) return <div className="p-4 text-center">Appointment not found</div>;
 
   return (
     <>
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">{test.testName}</h4>
-            <span className="text-muted small">{test.testCode} · {test.category}</span>
+            <h4 className="fw-bold mt-2">Appointment #{appointment.id}</h4>
+            <span className={`badge ${
+              appointment.appointmentStatus === "COMPLETED" ? "bg-success" : 
+              appointment.appointmentStatus === "SCHEDULED" ? "bg-primary" : "bg-danger"
+            }`}>
+              {appointment.appointmentStatus}
+            </span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (
@@ -74,8 +87,8 @@ const LabTestView = () => {
                   <i className="bi bi-three-dots-vertical fs-5"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/labtests/create">
-                    <i className="bi bi-plus-circle me-2"></i> Order New Test
+                  <Dropdown.Item as={Link} to="/appointments/create">
+                    <i className="bi bi-plus-circle me-2"></i> Schedule New
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => setIsEditable(true)}>
                     <i className="bi bi-pencil-square me-2"></i> Edit
@@ -89,8 +102,10 @@ const LabTestView = () => {
           </Col>
         </Row>
 
-        <LabTestForm 
-          testData={test} 
+        <AppointmentForm 
+          appointmentData={appointment} 
+          patients={patients}
+          doctors={doctors}
           isViewMode={true} 
           isEditable={isEditable} 
           onCancelEdit={() => setIsEditable(false)}
@@ -104,7 +119,7 @@ const LabTestView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete <b>{test.testName}</b>?
+          Are you sure you want to delete appointment <b>#{appointment.id}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -117,4 +132,4 @@ const LabTestView = () => {
   );
 };
 
-export default LabTestView;
+export default AppointmentView;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { appointmentAPI, patientAPI, doctorAPI } from "../services/api";
+import { appointmentAPI, patientAPI, doctorAPI } from "../../services/api";
 import AppointmentForm from "./components/appointment-form";
-import CardContainer from "../components/CardContainer";
+import CardContainer from "../../components/CardContainer";
 
 const AppointmentCreate = () => {
   const navigate = useNavigate();
