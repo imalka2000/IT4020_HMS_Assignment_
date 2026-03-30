@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Plus, Trash2, Calendar, CheckCircle, XCircle } from "lucide-react";
-import { appointmentAPI } from "../services/api";
+import { appointmentAPI, patientAPI, doctorAPI } from "../services/api";
 import useCRUD from "../hooks/useCRUD";
 
 const EMPTY = { patientId:"", doctorId:"", appointmentDate:"", appointmentTime:"", reason:"", notes:"" };
@@ -12,6 +12,16 @@ export default function Appointments({ search = "" }) {
   const [form, setForm]   = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [err2, setErr2]     = useState(null);
+
+  // Dropdown data
+  const [patients, setPatients] = useState([]);
+  const [doctors,  setDoctors]  = useState([]);
+
+  useEffect(() => {
+    patientAPI.getAll().then(setPatients).catch(() => {});
+    doctorAPI.getAll().then(setDoctors).catch(() => {});
+  }, []);
+
   const f = k => e => setForm(p => ({...p, [k]: e.target.value}));
 
   const save = async () => {
@@ -27,6 +37,16 @@ export default function Appointments({ search = "" }) {
   const del = async (id) => {
     if (!window.confirm("Delete appointment?")) return;
     try { await appointmentAPI.delete(id); reload(); } catch(e) { alert(e.message); }
+  };
+
+  // Helper functions to get patient / doctor name for display
+  const patientName = (pid) => {
+    const p = patients.find(p => p.id === pid);
+    return p ? `${p.firstName} ${p.lastName}` : `P-${pid}`;
+  };
+  const doctorName = (did) => {
+    const d = doctors.find(d => d.id === did);
+    return d ? `Dr. ${d.firstName} ${d.lastName}` : `D-${did}`;
   };
 
   const filtered = items.filter(a =>
@@ -72,9 +92,9 @@ export default function Appointments({ search = "" }) {
                 <tr><td colSpan={8}><div className="empty-state"><Calendar size={36} color="var(--text-muted)" style={{margin:"0 auto 10px"}}/><h3>No appointments</h3><p>Click "Schedule New" to book one.</p></div></td></tr>
               ) : filtered.map(a => (
                 <tr key={a.id}>
-                  <td className="td-mono">#{a.id}</td>
-                  <td className="td-mono">P-{a.patientId}</td>
-                  <td className="td-mono">D-{a.doctorId}</td>
+                  <td className="td-mono">#{a.id?.slice(-6)}</td>
+                  <td style={{fontWeight:500}}>{patientName(a.patientId)}</td>
+                  <td style={{fontWeight:500}}>{doctorName(a.doctorId)}</td>
                   <td style={{fontWeight:600}}>{a.appointmentDate}</td>
                   <td style={{color:"var(--text-mid)",fontSize:12}}>{a.appointmentTime}</td>
                   <td style={{maxWidth:140,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--text-mid)"}}>{a.reason}</td>
@@ -102,8 +122,33 @@ export default function Appointments({ search = "" }) {
             </div>
             {err2 && <div className="error-banner">{err2}</div>}
             <div className="form-grid">
-              <div className="form-group"><label>Patient ID</label><input type="number" value={form.patientId} onChange={f("patientId")} placeholder="e.g. 1"/></div>
-              <div className="form-group"><label>Doctor ID</label><input type="number" value={form.doctorId} onChange={f("doctorId")} placeholder="e.g. 1"/></div>
+
+              {/* Patient Dropdown */}
+              <div className="form-group">
+                <label>Patient</label>
+                <select value={form.patientId} onChange={f("patientId")}>
+                  <option value="">Select Patient</option>
+                  {patients.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.firstName} {p.lastName} {p.dateOfBirth ? `(${p.dateOfBirth})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Doctor Dropdown */}
+              <div className="form-group">
+                <label>Doctor</label>
+                <select value={form.doctorId} onChange={f("doctorId")}>
+                  <option value="">— Select Doctor —</option>
+                  {doctors.map(d => (
+                    <option key={d.id} value={d.id}>
+                      Dr. {d.firstName} {d.lastName}{d.specialization ? ` — ${d.specialization}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="form-group"><label>Date</label><input type="date" value={form.appointmentDate} onChange={f("appointmentDate")}/></div>
               <div className="form-group"><label>Time</label><input type="time" value={form.appointmentTime} onChange={f("appointmentTime")}/></div>
               <div className="form-group full"><label>Reason</label><input value={form.reason} onChange={f("reason")} placeholder="Purpose of visit"/></div>
@@ -111,7 +156,7 @@ export default function Appointments({ search = "" }) {
             </div>
             <div className="form-actions">
               <button className="btn btn-ghost" onClick={()=>setModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?"Booking…":"Confirm Booking"}</button>
+              <button className="btn btn-primary" onClick={save} disabled={saving||!form.patientId||!form.doctorId}>{saving?"Booking…":"Confirm Booking"}</button>
             </div>
           </div>
         </div>
