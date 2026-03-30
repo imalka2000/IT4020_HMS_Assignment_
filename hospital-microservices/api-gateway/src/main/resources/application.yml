@@ -1,0 +1,181 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+      routes:
+
+        # === PATIENT SERVICE ===
+        # Base path: GET list + POST create
+        - id: patient-service-base
+          uri: http://localhost:8081
+          predicates:
+            - Path=/gateway/patients,/gateway/patients/
+          filters:
+            - SetPath=/api/patients
+
+        # Sub-paths: GET by ID, PUT, DELETE, PATCH, search, etc.
+        - id: patient-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/gateway/patients/**
+          filters:
+            - RewritePath=/gateway/patients/(?<segment>.*), /api/patients/${segment}
+
+        # === DOCTOR SERVICE ===
+        - id: doctor-service-base
+          uri: http://localhost:8082
+          predicates:
+            - Path=/gateway/doctors,/gateway/doctors/
+          filters:
+            - SetPath=/api/doctors
+
+        - id: doctor-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/gateway/doctors/**
+          filters:
+            - RewritePath=/gateway/doctors/(?<segment>.*), /api/doctors/${segment}
+
+        # === APPOINTMENT SERVICE ===
+        - id: appointment-service-base
+          uri: http://localhost:8083
+          predicates:
+            - Path=/gateway/appointments,/gateway/appointments/
+          filters:
+            - SetPath=/api/appointments
+
+        - id: appointment-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/gateway/appointments/**
+          filters:
+            - RewritePath=/gateway/appointments/(?<segment>.*), /api/appointments/${segment}
+
+        # === PHARMACY SERVICE ===
+        - id: pharmacy-service-base
+          uri: http://localhost:8084
+          predicates:
+            - Path=/gateway/medicines,/gateway/medicines/
+          filters:
+            - SetPath=/api/medicines
+
+        - id: pharmacy-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/gateway/medicines/**
+          filters:
+            - RewritePath=/gateway/medicines/(?<segment>.*), /api/medicines/${segment}
+
+        # === BILLING SERVICE ===
+        - id: billing-service-base
+          uri: http://localhost:8085
+          predicates:
+            - Path=/gateway/invoices,/gateway/invoices/
+          filters:
+            - SetPath=/api/invoices
+
+        - id: billing-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/gateway/invoices/**
+          filters:
+            - RewritePath=/gateway/invoices/(?<segment>.*), /api/invoices/${segment}
+
+        # === LAB TEST SERVICE ===
+        - id: labtest-service-base
+          uri: http://localhost:8086
+          predicates:
+            - Path=/gateway/labtests,/gateway/labtests/
+          filters:
+            - SetPath=/api/labtests
+
+        - id: labtest-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/gateway/labtests/**
+          filters:
+            - RewritePath=/gateway/labtests/(?<segment>.*), /api/labtests/${segment}
+
+        # === SWAGGER DOC PROXY ROUTES ===
+        - id: patient-docs
+          uri: http://localhost:8081
+          predicates:
+            - Path=/patient-docs/**
+          filters:
+            - RewritePath=/patient-docs/(?<segment>.*), /${segment}
+
+        - id: doctor-docs
+          uri: http://localhost:8082
+          predicates:
+            - Path=/doctor-docs/**
+          filters:
+            - RewritePath=/doctor-docs/(?<segment>.*), /${segment}
+
+        - id: appointment-docs
+          uri: http://localhost:8083
+          predicates:
+            - Path=/appointment-docs/**
+          filters:
+            - RewritePath=/appointment-docs/(?<segment>.*), /${segment}
+
+        - id: pharmacy-docs
+          uri: http://localhost:8084
+          predicates:
+            - Path=/pharmacy-docs/**
+          filters:
+            - RewritePath=/pharmacy-docs/(?<segment>.*), /${segment}
+
+        - id: billing-docs
+          uri: http://localhost:8085
+          predicates:
+            - Path=/billing-docs/**
+          filters:
+            - RewritePath=/billing-docs/(?<segment>.*), /${segment}
+
+        - id: labtest-docs
+          uri: http://localhost:8086
+          predicates:
+            - Path=/labtest-docs/**
+          filters:
+            - RewritePath=/labtest-docs/(?<segment>.*), /${segment}
+
+      # CORS for React frontend on port 3000
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: false
+
+# SpringDoc / Swagger UI aggregated via gateway
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Patient Service
+        url: /patient-docs/api-docs
+      - name: Doctor Service
+        url: /doctor-docs/api-docs
+      - name: Appointment Service
+        url: /appointment-docs/api-docs
+      - name: Pharmacy Service
+        url: /pharmacy-docs/api-docs
+      - name: Billing Service
+        url: /billing-docs/api-docs
+      - name: Lab Test Service
+        url: /labtest-docs/api-docs

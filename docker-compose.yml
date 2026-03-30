@@ -1,0 +1,89 @@
+version: "3.9"
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: hms-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - hms-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  patient-service:
+    build: { context: ./hospital-microservices/patient-service, dockerfile: Dockerfile }
+    container_name: patient-service
+    ports: ["8081:8081"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  doctor-service:
+    build: { context: ./hospital-microservices/doctor-service, dockerfile: Dockerfile }
+    container_name: doctor-service
+    ports: ["8082:8082"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  appointment-service:
+    build: { context: ./hospital-microservices/appointment-service, dockerfile: Dockerfile }
+    container_name: appointment-service
+    ports: ["8083:8083"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  pharmacy-service:
+    build: { context: ./hospital-microservices/pharmacy-service, dockerfile: Dockerfile }
+    container_name: pharmacy-service
+    ports: ["8084:8084"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  billing-service:
+    build: { context: ./hospital-microservices/billing-service, dockerfile: Dockerfile }
+    container_name: billing-service
+    ports: ["8085:8085"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  labtest-service:
+    build: { context: ./hospital-microservices/labtest-service, dockerfile: Dockerfile }
+    container_name: labtest-service
+    ports: ["8086:8086"]
+    depends_on: { mongodb: { condition: service_healthy } }
+    networks: [hms-network]
+    restart: on-failure
+
+  api-gateway:
+    build: { context: ./hospital-microservices/api-gateway, dockerfile: Dockerfile }
+    container_name: api-gateway
+    ports: ["8080:8080"]
+    depends_on: [patient-service, doctor-service, appointment-service, pharmacy-service, billing-service, labtest-service]
+    networks: [hms-network]
+    restart: on-failure
+
+  frontend:
+    build: { context: ./hospital-frontend, dockerfile: Dockerfile }
+    container_name: hms-frontend
+    ports: ["3000:3000"]
+    depends_on: [api-gateway]
+    networks: [hms-network]
+
+volumes:
+  mongodb_data:
+    name: hms_mongodb_data
+
+networks:
+  hms-network:
+    driver: bridge
+    name: hms-network
