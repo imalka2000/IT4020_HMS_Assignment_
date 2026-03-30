@@ -1,0 +1,40 @@
+:root {
+  --theme-color: #1e6643;
+  --theme-color-light: #4dffa9;
+  --pagination: #1e6643;
+  --nav-hover: #e22a6f;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.btn-primary {
+  background-color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+}
+
+.text-primary {
+  color: var(--theme-color) !important;
+}
+
+.badge.bg-primary {
+  background-color: var(--theme-color) !important;
+}
+
+.react-select__control {
+  border-color: #dee2e6 !important;
+  box-shadow: none !important;
+}
+
+.react-select__control--is-focused {
+  border-color: var(--theme-color) !important;
+}
+
+.card {
+  border-radius: 8px;
+}

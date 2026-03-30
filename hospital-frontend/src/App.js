@@ -5,12 +5,24 @@ import {
   FlaskConical, LayoutDashboard, Search, Bell, Activity
 } from "lucide-react";
 import Dashboard    from "./pages/Dashboard";
-import Patients     from "./pages/Patients";
-import Doctors      from "./pages/Doctors";
-import Appointments from "./pages/Appointments";
-import Pharmacy     from "./pages/Pharmacy";
-import Billing      from "./pages/Billing";
-import LabTests     from "./pages/LabTests";
+import Patients     from "./patient/patients";
+import PatientCreate from "./patient/patient-create";
+import PatientView   from "./patient/patient-view";
+import Doctors       from "./doctor/doctors";
+import DoctorCreate  from "./doctor/doctor-create";
+import DoctorView    from "./doctor/doctor-view";
+import Appointments      from "./appointment/appointments";
+import AppointmentCreate from "./appointment/appointment-create";
+import AppointmentView   from "./appointment/appointment-view";
+import Pharmacy      from "./pharmacy/pharmacy";
+import PharmacyCreate from "./pharmacy/pharmacy-create";
+import PharmacyView   from "./pharmacy/pharmacy-view";
+import Billing      from "./billing/bills";
+import BillCreate   from "./billing/bill-create";
+import BillView     from "./billing/bill-view";
+import LabTests      from "./labtest/labtests";
+import LabTestCreate from "./labtest/labtest-create";
+import LabTestView   from "./labtest/labtest-view";
 import "./App.css";
 
 const NAV = [
@@ -110,11 +122,23 @@ function AppInner({ search, setSearch }) {
         <Routes>
           <Route path="/"             element={<Dashboard />} />
           <Route path="/patients"     element={<Patients search={search} />} />
+          <Route path="/patients/create" element={<PatientCreate />} />
+          <Route path="/patients/:id"    element={<PatientView />} />
           <Route path="/doctors"      element={<Doctors search={search} />} />
+          <Route path="/doctors/create" element={<DoctorCreate />} />
+          <Route path="/doctors/:id"    element={<DoctorView />} />
           <Route path="/appointments" element={<Appointments search={search} />} />
+          <Route path="/appointments/create" element={<AppointmentCreate />} />
+          <Route path="/appointments/:id"    element={<AppointmentView />} />
           <Route path="/pharmacy"     element={<Pharmacy search={search} />} />
+          <Route path="/pharmacy/create" element={<PharmacyCreate />} />
+          <Route path="/pharmacy/:id"    element={<PharmacyView />} />
           <Route path="/billing"      element={<Billing search={search} />} />
+          <Route path="/billing/create" element={<BillCreate />} />
+          <Route path="/billing/:id"    element={<BillView />} />
           <Route path="/labtests"     element={<LabTests search={search} />} />
+          <Route path="/labtests/create" element={<LabTestCreate />} />
+          <Route path="/labtests/:id"    element={<LabTestView />} />
         </Routes>
       </main>
     </div>
