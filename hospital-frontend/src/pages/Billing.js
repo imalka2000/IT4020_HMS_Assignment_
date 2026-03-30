@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Plus, Trash2, Receipt, CreditCard } from "lucide-react";
-import { billingAPI } from "../services/api";
+import { billingAPI, patientAPI, appointmentAPI } from "../services/api";
 import useCRUD from "../hooks/useCRUD";
 
 const EMPTY = { patientId:"", appointmentId:"", invoiceDate:"", consultationFee:"", medicineFee:"", labFee:"" };
@@ -8,18 +8,45 @@ const STATUS_MAP = { PENDING:"badge-orange", PAID:"badge-green", CANCELLED:"badg
 
 export default function Billing({ search = "" }) {
   const { items, loading, error, reload } = useCRUD(useCallback(() => billingAPI.getAll(), []));
-  const [modal, setModal]     = useState(false);
+  const [modal, setModal]       = useState(false);
   const [payModal, setPayModal] = useState(null);
-  const [form, setForm]       = useState(EMPTY);
+  const [form, setForm]         = useState(EMPTY);
   const [payMethod, setPayMethod] = useState("CASH");
-  const [saving, setSaving]   = useState(false);
-  const [err2, setErr2]       = useState(null);
+  const [saving, setSaving]     = useState(false);
+  const [err2, setErr2]         = useState(null);
+
+  // Dropdown data
+  const [patients,     setPatients]     = useState([]);
+  const [allAppts,     setAllAppts]     = useState([]);
+  const [filteredAppts, setFilteredAppts] = useState([]);
+
+  useEffect(() => {
+    patientAPI.getAll().then(setPatients).catch(() => {});
+    appointmentAPI.getAll().then(setAllAppts).catch(() => {});
+  }, []);
+
+  // When patient selection changes, filter appointments and reset appointmentId
+  const handlePatientChange = (e) => {
+    const pid = e.target.value;
+    setForm(p => ({ ...p, patientId: pid, appointmentId: "" }));
+    if (pid) {
+      setFilteredAppts(allAppts.filter(a => a.patientId === pid));
+    } else {
+      setFilteredAppts([]);
+    }
+  };
+
   const f = k => e => setForm(p => ({...p, [k]: e.target.value}));
 
   const save = async () => {
     setSaving(true); setErr2(null);
     try {
-      await billingAPI.create({ ...form, patientId:parseInt(form.patientId)||null, appointmentId:parseInt(form.appointmentId)||null, consultationFee:parseFloat(form.consultationFee)||0, medicineFee:parseFloat(form.medicineFee)||0, labFee:parseFloat(form.labFee)||0 });
+      await billingAPI.create({
+        ...form,
+        consultationFee: parseFloat(form.consultationFee) || 0,
+        medicineFee:     parseFloat(form.medicineFee) || 0,
+        labFee:          parseFloat(form.labFee) || 0
+      });
       setModal(false); reload();
     } catch(e) { setErr2(e.message); } finally { setSaving(false); }
   };
@@ -33,6 +60,12 @@ export default function Billing({ search = "" }) {
     try { await billingAPI.delete(id); reload(); } catch(e) { alert(e.message); }
   };
 
+  // Helpers: resolve names for table
+  const patientName = (pid) => {
+    const p = patients.find(p => p.id === pid);
+    return p ? `${p.firstName} ${p.lastName}` : `P-${pid}`;
+  };
+
   const filtered = items.filter(i =>
     `${i.patientId} ${i.paymentStatus} ${i.invoiceDate}`.toLowerCase().includes(search.toLowerCase())
   );
@@ -43,7 +76,7 @@ export default function Billing({ search = "" }) {
       <div className="page-header">
         <div><h1 className="page-title">Billing</h1><p className="page-sub">Invoice management and payment tracking</p></div>
         <div className="page-actions">
-          <button className="btn btn-primary" onClick={()=>{setForm(EMPTY);setErr2(null);setModal(true);}}><Plus size={14}/>New Invoice</button>
+          <button className="btn btn-primary" onClick={()=>{setForm(EMPTY);setFilteredAppts([]);setErr2(null);setModal(true);}}><Plus size={14}/>New Invoice</button>
         </div>
       </div>
 
@@ -67,9 +100,9 @@ export default function Billing({ search = "" }) {
               : filtered.length === 0 ? <tr><td colSpan={10}><div className="empty-state"><Receipt size={36} color="var(--text-muted)" style={{margin:"0 auto 10px"}}/><h3>No invoices</h3></div></td></tr>
               : filtered.map(inv => (
                 <tr key={inv.id}>
-                  <td className="td-mono">#{inv.id}</td>
-                  <td className="td-mono">P-{inv.patientId}</td>
-                  <td className="td-mono">{inv.appointmentId?`A-${inv.appointmentId}`:"—"}</td>
+                  <td className="td-mono">#{inv.id?.slice(-6)}</td>
+                  <td style={{fontWeight:500}}>{patientName(inv.patientId)}</td>
+                  <td className="td-mono">{inv.appointmentId ? `#${inv.appointmentId?.slice(-6)}` : "—"}</td>
                   <td style={{fontSize:12}}>{inv.invoiceDate}</td>
                   <td className="td-mono">Rs. {inv.consultationFee?.toFixed(2)}</td>
                   <td className="td-mono">Rs. {inv.medicineFee?.toFixed(2)}</td>
@@ -93,16 +126,45 @@ export default function Billing({ search = "" }) {
             <div className="modal-header"><div className="modal-title">Generate Invoice</div><button className="modal-close" onClick={()=>setModal(false)}>×</button></div>
             {err2 && <div className="error-banner">{err2}</div>}
             <div className="form-grid">
-              <div className="form-group"><label>Patient ID</label><input type="number" value={form.patientId} onChange={f("patientId")}/></div>
-              <div className="form-group"><label>Appointment ID</label><input type="number" value={form.appointmentId} onChange={f("appointmentId")}/></div>
+
+              {/* Patient Dropdown */}
+              <div className="form-group">
+                <label>Patient</label>
+                <select value={form.patientId} onChange={handlePatientChange}>
+                  <option value="">— Select Patient —</option>
+                  {patients.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.firstName} {p.lastName}{p.dateOfBirth ? ` (${p.dateOfBirth})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Appointment Dropdown — filtered by selected patient */}
+              <div className="form-group">
+                <label>Appointment</label>
+                <select value={form.appointmentId} onChange={f("appointmentId")} disabled={!form.patientId}>
+                  <option value="">
+                    {form.patientId
+                      ? filteredAppts.length === 0 ? "No appointments for this patient" : "— Select Appointment —"
+                      : "— Select a patient first —"}
+                  </option>
+                  {filteredAppts.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.appointmentDate} {a.appointmentTime} — {a.reason || "No reason"} [{a.status}]
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="form-group"><label>Invoice Date</label><input type="date" value={form.invoiceDate} onChange={f("invoiceDate")}/></div>
-              <div className="form-group"><label>Consultation Fee</label><input type="number" value={form.consultationFee} onChange={f("consultationFee")} placeholder="0.00"/></div>
-              <div className="form-group"><label>Medicine Fee</label><input type="number" value={form.medicineFee} onChange={f("medicineFee")} placeholder="0.00"/></div>
-              <div className="form-group"><label>Lab Fee</label><input type="number" value={form.labFee} onChange={f("labFee")} placeholder="0.00"/></div>
+              <div className="form-group"><label>Consultation Fee (Rs.)</label><input type="number" step="0.01" value={form.consultationFee} onChange={f("consultationFee")} placeholder="0.00"/></div>
+              <div className="form-group"><label>Medicine Fee (Rs.)</label><input type="number" step="0.01" value={form.medicineFee} onChange={f("medicineFee")} placeholder="0.00"/></div>
+              <div className="form-group"><label>Lab Fee (Rs.)</label><input type="number" step="0.01" value={form.labFee} onChange={f("labFee")} placeholder="0.00"/></div>
             </div>
             <div className="form-actions">
               <button className="btn btn-ghost" onClick={()=>setModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?"Creating…":"Create Invoice"}</button>
+              <button className="btn btn-primary" onClick={save} disabled={saving || !form.patientId}>{saving?"Creating…":"Create Invoice"}</button>
             </div>
           </div>
         </div>
