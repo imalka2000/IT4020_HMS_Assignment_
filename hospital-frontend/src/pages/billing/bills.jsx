@@ -13,7 +13,7 @@ export default function Bills({ search: topSearch = "" }) {
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(b => 
+  const filtered = items.filter(b =>
     `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
     `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
   );
@@ -32,10 +32,10 @@ export default function Bills({ search: topSearch = "" }) {
         </div>
         <div className="d-flex gap-2 align-items-center">
           <Button variant="link" className="p-0 text-dark text-decoration-none d-flex align-items-center gap-1" onClick={resetFilters}>
-            <RotateCcw size={14}/> Reset
+            <RotateCcw size={14} /> Reset
           </Button>
           <Button as={Link} to="/billing/create" variant="primary" className="d-flex align-items-center gap-1">
-            <Plus size={16}/> Create New Bill
+            <Plus size={16} /> Create New Bill
           </Button>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default function Bills({ search: topSearch = "" }) {
         <div style={{ maxWidth: "300px", width: "100%" }}>
           <InputGroup size="sm">
             <InputGroup.Text className="bg-white border-end-0">
-              <Search size={14} className="text-muted"/>
+              <Search size={14} className="text-muted" />
             </InputGroup.Text>
             <Form.Control
               placeholder="Search bills..."
@@ -80,23 +80,26 @@ export default function Bills({ search: topSearch = "" }) {
                 <td className="fw-bold">
                   <Link to={`/billing/${b.id}`} className="text-decoration-none">#{b.id}</Link>
                 </td>
-                <td><span className="badge bg-secondary opacity-75">P-{b.patientId}</span></td>
+                <td>
+                  <span className="badge bg-secondary opacity-75">
+                    P-{b.patientId}
+                  </span>
+                </td>
                 <td>{b.appointmentId ? <span className="badge bg-info text-dark opacity-75">A-{b.appointmentId}</span> : "-"}</td>
                 <td className="text-end fw-bold">Rs. {parseFloat(b.totalAmount || 0).toFixed(2)}</td>
                 <td>{b.invoiceDate ? new Date(b.invoiceDate).toLocaleDateString() : "-"}</td>
                 <td><span className="small text-uppercase">{b.paymentMethod}</span></td>
                 <td>
-                  <span className={`badge ${
-                    b.paymentStatus === "PAID" ? "bg-success" : 
+                  <span className={`badge ${b.paymentStatus === "PAID" ? "bg-success" :
                     b.paymentStatus === "PENDING" ? "bg-warning text-dark" : "bg-danger"
-                  }`}>
+                    }`}>
                     {b.paymentStatus}
                   </span>
                 </td>
                 <td className="text-center">
-                  <Button 
-                    variant="link" 
-                    className="p-0 text-primary me-2" 
+                  <Button
+                    variant="link"
+                    className="p-0 text-primary me-2"
                     onClick={() => navigate(`/billing/${b.id}`)}
                     title="View & Edit"
                   >
