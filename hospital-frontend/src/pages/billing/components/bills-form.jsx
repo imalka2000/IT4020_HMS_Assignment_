@@ -5,6 +5,9 @@ import { useForm } from "react-hook-form";
 const defaultValues = {
   patientId: "",
   appointmentId: "",
+  consultationFee: 0.0,
+  medicineFee: 0.0,
+  labFee: 0.0,
   totalAmount: 0.0,
   paymentStatus: "PENDING",
   invoiceDate: new Date().toISOString().slice(0, 10),
@@ -26,13 +29,28 @@ const BillsForm = ({
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     defaultValues: defaultValues
   });
 
   const watchedPatientId = watch("patientId");
-  const filteredAppointments = appointments.filter(a => String(a.patientId) === String(watchedPatientId));
+  const filteredAppointments = appointments.filter(a => 
+    String(a.patientId) === String(watchedPatientId) && 
+    (isViewMode || (a.status !== "COMPLETED" && a.appointmentStatus !== "COMPLETED"))
+  );
+
+  const watchConsultation = watch("consultationFee");
+  const watchMedicine = watch("medicineFee");
+  const watchLab = watch("labFee");
+
+  useEffect(() => {
+    const total = (parseFloat(watchConsultation) || 0) + 
+                  (parseFloat(watchMedicine) || 0) + 
+                  (parseFloat(watchLab) || 0);
+    setValue("totalAmount", total.toFixed(2));
+  }, [watchConsultation, watchMedicine, watchLab, setValue]);
 
   useEffect(() => {
     if (billData && (billData.id || billData.patientId)) {
@@ -42,19 +60,19 @@ const BillsForm = ({
         invoiceDate: billData.invoiceDate 
           ? new Date(billData.invoiceDate).toISOString().slice(0, 10) 
           : defaultValues.invoiceDate,
-        totalAmount: billData.totalAmount !== undefined ? billData.totalAmount : defaultValues.totalAmount,
-        paymentStatus: billData.paymentStatus || defaultValues.paymentStatus
       });
     }
   }, [billData, reset]);
 
   const handleFormSubmit = async (data) => {
     if (onSubmit) {
-      // Ensure IDs are strings and numbers are floats
       const formattedData = {
         ...data,
         patientId: String(data.patientId),
         appointmentId: data.appointmentId ? String(data.appointmentId) : null,
+        consultationFee: parseFloat(data.consultationFee) || 0,
+        medicineFee: parseFloat(data.medicineFee) || 0,
+        labFee: parseFloat(data.labFee) || 0,
         totalAmount: parseFloat(data.totalAmount)
       };
       await onSubmit(formattedData);
@@ -76,7 +94,7 @@ const BillsForm = ({
             <option value="">Select Patient...</option>
             {patients.map(p => (
               <option key={p.id} value={p.id}>
-                #{p.id} - {p.firstName} {p.lastName}
+                {p.firstName} {p.lastName}
               </option>
             ))}
           </Form.Select>
@@ -110,15 +128,57 @@ const BillsForm = ({
 
       <Row className="mb-3 align-items-center">
         <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">Consultation Fee (Rs.)</Form.Label>
+        </Col>
+        <Col md={6}>
+          <Form.Control
+            type="number"
+            step="0.01"
+            {...register("consultationFee")}
+            disabled={!isEditable}
+          />
+        </Col>
+      </Row>
+
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">Medicine Fee (Rs.)</Form.Label>
+        </Col>
+        <Col md={6}>
+          <Form.Control
+            type="number"
+            step="0.01"
+            {...register("medicineFee")}
+            disabled={!isEditable}
+          />
+        </Col>
+      </Row>
+
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">Lab Fee (Rs.)</Form.Label>
+        </Col>
+        <Col md={6}>
+          <Form.Control
+            type="number"
+            step="0.01"
+            {...register("labFee")}
+            disabled={!isEditable}
+          />
+        </Col>
+      </Row>
+
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
           <Form.Label className="mb-0 fw-bold">Total Amount (Rs.) *</Form.Label>
         </Col>
         <Col md={6}>
           <Form.Control
             type="number"
             step="0.01"
-            {...register("totalAmount", { required: "Amount is required" })}
-            disabled={!isEditable}
-            isInvalid={!!errors.totalAmount}
+            {...register("totalAmount", { required: "Total amount is required" })}
+            disabled={true}
+            className="bg-light fw-bold text-success"
           />
           <Form.Control.Feedback type="invalid">
             {errors.totalAmount?.message}

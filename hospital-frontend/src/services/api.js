@@ -52,6 +52,7 @@ export const billingAPI     = {
   getAll:()=>api("GET","/invoices"), 
   getById:(id)=>api("GET",`/invoices/${id}`), 
   create:(d)=>api("POST","/invoices",d), 
+  update:(id,d)=>api("PUT",`/invoices/${id}`,d), 
   delete:(id)=>api("DELETE",`/invoices/${id}`), 
   markPaid:(id,m)=>api("PATCH",`/invoices/${id}/pay?paymentMethod=${m}`), 
   byPatient:(p)=>api("GET",`/invoices/patient/${p}`), 

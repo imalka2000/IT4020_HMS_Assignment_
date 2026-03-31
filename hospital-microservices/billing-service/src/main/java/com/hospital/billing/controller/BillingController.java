@@ -20,6 +20,9 @@ public class BillingController {
     @PostMapping @Operation(summary="Generate invoice")
     public ResponseEntity<Invoice> create(@RequestBody Invoice inv) {
         return ResponseEntity.status(HttpStatus.CREATED).body(svc.create(inv)); }
+    @PutMapping("/{id}") @Operation(summary="Update invoice")
+    public ResponseEntity<Invoice> update(@PathVariable String id, @RequestBody Invoice d) {
+        return svc.update(id, d).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()); }
     @PatchMapping("/{id}/pay") @Operation(summary="Mark as paid")
     public ResponseEntity<Invoice> markPaid(@PathVariable String id, @RequestParam String paymentMethod) {
         return svc.markPaid(id, paymentMethod).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()); }

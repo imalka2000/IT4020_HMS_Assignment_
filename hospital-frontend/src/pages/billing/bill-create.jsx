@@ -31,7 +31,19 @@ const BillCreate = () => {
     setLoading(true);
     try {
       await billingAPI.create(data);
-      toast.success("Bill created successfully");
+
+      // After bill created, update appointment status if exists
+      if (data.appointmentId) {
+        const appointment = appointments.find(a => String(a.id) === String(data.appointmentId));
+        if (appointment) {
+          await appointmentAPI.update(data.appointmentId, {
+            ...appointment,
+            status: "COMPLETED"
+          });
+        }
+      }
+
+      toast.success("Bill created successfully and Appointment marked as Completed");
       setTimeout(() => navigate("/billing"), 1500);
     } catch (error) {
       toast.error(error.message || "Failed to create bill");
@@ -46,11 +58,11 @@ const BillCreate = () => {
         <h4 className="fw-bold px-2">Create New Bill</h4>
       </div>
       <CardContainer>
-        <BillsForm 
-          onSubmit={handleSave} 
-          isLoading={loading} 
-          patients={patients} 
-          appointments={appointments} 
+        <BillsForm
+          onSubmit={handleSave}
+          isLoading={loading}
+          patients={patients}
+          appointments={appointments}
         />
       </CardContainer>
       <ToastContainer position="top-right" autoClose={3000} />

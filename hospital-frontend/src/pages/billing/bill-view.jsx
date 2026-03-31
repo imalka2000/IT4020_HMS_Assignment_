@@ -43,6 +43,18 @@ const BillView = () => {
     setIsSaving(true);
     try {
       await billingAPI.update(id, data);
+
+      // If appointment ID is provided/changed, mark it as completed
+      if (data.appointmentId) {
+        const appointment = appointments.find(a => String(a.id) === String(data.appointmentId));
+        if (appointment && (appointment.status !== "COMPLETED" && appointment.appointmentStatus !== "COMPLETED")) {
+          await appointmentAPI.update(data.appointmentId, {
+            ...appointment,
+            status: "COMPLETED"
+          });
+        }
+      }
+
       toast.success("Bill updated successfully");
       setIsEditable(false);
       fetchData();
