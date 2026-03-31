@@ -47,135 +47,61 @@ const PatientForm = ({
     }
   };
 
-  return (
-    <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">First Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("firstName", { required: "First name is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.firstName}
-              placeholder="John"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.firstName?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+  const renderField = (label, name, type = "text", options = null, required = false) => {
+    return (
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">{label} {required && "*"}</Form.Label>
         </Col>
         <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Last Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("lastName", { required: "Last name is required" })}
+          {options ? (
+            <Form.Select
+              {...register(name, { required: required ? `${label} is required` : false })}
               disabled={!isEditable}
-              isInvalid={!!errors.lastName}
-              placeholder="Smith"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.lastName?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Email *</Form.Label>
+              isInvalid={!!errors[name]}
+            >
+              <option value="">Select {label}...</option>
+              {options.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </Form.Select>
+          ) : (
             <Form.Control
-              type="email"
-              {...register("email", { 
-                required: "Email is required",
-                pattern: {
+              type={type}
+              {...register(name, { 
+                required: required ? `${label} is required` : false,
+                pattern: type === "email" ? {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                   message: "Invalid email address"
-                }
+                } : undefined
               })}
               disabled={!isEditable}
-              isInvalid={!!errors.email}
-              placeholder="john@email.com"
+              isInvalid={!!errors[name]}
+              placeholder={`Enter ${label}`}
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.email?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Phone *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("phone", { required: "Phone is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.phone}
-              placeholder="+94 77 000 0000"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.phone?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+          )}
+          <Form.Control.Feedback type="invalid">
+            {errors[name]?.message}
+          </Form.Control.Feedback>
         </Col>
       </Row>
+    );
+  };
 
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Date of Birth *</Form.Label>
-            <Form.Control
-              type="date"
-              {...register("dateOfBirth", { required: "Date of birth is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.dateOfBirth}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Gender *</Form.Label>
-            <Form.Select 
-              {...register("gender", { required: "Gender is required" })} 
-              disabled={!isEditable}
-              isInvalid={!!errors.gender}
-            >
-              <option value="">Select...</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Blood Group</Form.Label>
-            <Form.Select {...register("bloodGroup")} disabled={!isEditable}>
-              <option value="">Select...</option>
-              {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Address</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("address")}
-              disabled={!isEditable}
-              placeholder="No. 1, Main Street"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+  return (
+    <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
+      {renderField("First Name", "firstName", "text", null, true)}
+      {renderField("Last Name", "lastName", "text", null, true)}
+      {renderField("Email", "email", "email", null, true)}
+      {renderField("Phone", "phone", "text", null, true)}
+      {renderField("Date of Birth", "dateOfBirth", "date", null, true)}
+      {renderField("Gender", "gender", "text", ["Male", "Female", "Other"], true)}
+      {renderField("Blood Group", "bloodGroup", "text", BLOOD_GROUPS)}
+      {renderField("Address", "address", "text")}
 
       {isEditable && (
         <Row className="mt-4">
-          <Col md={12}>
+          <Col md={{ span: 6, offset: 3 }}>
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Saving..." : (isViewMode ? "Update Patient" : "Create Patient")}

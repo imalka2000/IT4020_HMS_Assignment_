@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { billingAPI } from "../../services/api";
+import { billingAPI, patientAPI, appointmentAPI } from "../../services/api";
 import BillsForm from "./components/bills-form";
 import CardContainer from "../../components/CardContainer";
 
@@ -10,22 +10,30 @@ const BillView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [bill, setBill] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchBill();
+    fetchData();
   }, [id]);
 
-  const fetchBill = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await billingAPI.getById(id);
-      setBill(data);
+      const [billData, pData, aData] = await Promise.all([
+        billingAPI.getById(id),
+        patientAPI.getAll(),
+        appointmentAPI.getAll()
+      ]);
+      setBill(billData);
+      setPatients(pData);
+      setAppointments(aData);
     } catch (error) {
-      toast.error("Failed to load bill details");
+      toast.error("Failed to load details");
     } finally {
       setLoading(false);
     }
@@ -34,15 +42,10 @@ const BillView = () => {
   const handleUpdate = async (data) => {
     setIsSaving(true);
     try {
-      await billingAPI.update(id, {
-        ...data,
-        patientId: parseInt(data.patientId),
-        appointmentId: data.appointmentId ? parseInt(data.appointmentId) : null,
-        amount: parseFloat(data.amount)
-      });
+      await billingAPI.update(id, data);
       toast.success("Bill updated successfully");
       setIsEditable(false);
-      fetchBill();
+      fetchData();
     } catch (error) {
       toast.error("Failed to update bill");
     } finally {
@@ -100,6 +103,8 @@ const BillView = () => {
           onCancelEdit={() => setIsEditable(false)}
           onSubmit={handleUpdate}
           isLoading={isSaving}
+          patients={patients}
+          appointments={appointments}
         />
       </CardContainer>
 

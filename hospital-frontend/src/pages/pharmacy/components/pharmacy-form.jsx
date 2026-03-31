@@ -52,117 +52,58 @@ const PharmacyForm = ({
     }
   };
 
+  const renderField = (label, name, type = "text", options = null, required = false) => {
+    return (
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">{label} {required && "*"}</Form.Label>
+        </Col>
+        <Col md={6}>
+          {options ? (
+            <Form.Select
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+            >
+              <option value="">Select {label}...</option>
+              {options.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </Form.Select>
+          ) : (
+            <Form.Control
+              type={type}
+              as={type === "textarea" ? "textarea" : "input"}
+              rows={type === "textarea" ? 3 : undefined}
+              step={type === "number" ? "0.01" : undefined}
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+              placeholder={`Enter ${label}`}
+            />
+          )}
+          <Form.Control.Feedback type="invalid">
+            {errors[name]?.message}
+          </Form.Control.Feedback>
+        </Col>
+      </Row>
+    );
+  };
+
   return (
     <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Medicine Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("name", { required: "Name is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.name}
-              placeholder="e.g. Amoxicillin"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.name?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Generic Name</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("genericName")}
-              disabled={!isEditable}
-              placeholder="e.g. Penicillin"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Category *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("category", { required: "Category is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.category}
-              placeholder="e.g. Antibiotic"
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Manufacturer</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("manufacturer")}
-              disabled={!isEditable}
-              placeholder="e.g. Pfizer"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Price (Rs.) *</Form.Label>
-            <Form.Control
-              type="number"
-              step="0.01"
-              {...register("price", { required: "Price is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.price}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Stock Quantity *</Form.Label>
-            <Form.Control
-              type="number"
-              {...register("stockQuantity", { required: "Stock is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.stockQuantity}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Expiry Date *</Form.Label>
-            <Form.Control
-              type="date"
-              {...register("expiryDate", { required: "Expiry date is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.expiryDate}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Description</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("description")}
-              disabled={!isEditable}
-              placeholder="Dosage, instructions, etc."
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+      {renderField("Medicine Name", "name", "text", null, true)}
+      {renderField("Generic Name", "genericName")}
+      {renderField("Category", "category", "text", null, true)}
+      {renderField("Manufacturer", "manufacturer")}
+      {renderField("Price (Rs.)", "price", "number", null, true)}
+      {renderField("Stock Quantity", "stockQuantity", "number", null, true)}
+      {renderField("Expiry Date", "expiryDate", "date", null, true)}
+      {renderField("Description", "description", "textarea")}
 
       {isEditable && (
         <Row className="mt-4">
-          <Col md={12}>
+          <Col md={{ span: 6, offset: 3 }}>
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Saving..." : (isViewMode ? "Update Medicine" : "Add Medicine")}

@@ -46,125 +46,74 @@ const LabTestForm = ({
 
   const handleFormSubmit = async (data) => {
     if (onSubmit) {
-      await onSubmit({
+      // Ensure IDs are strings
+      const formattedData = {
         ...data,
-        patientId: parseInt(data.patientId),
-        doctorId: parseInt(data.doctorId)
-      });
+        patientId: String(data.patientId),
+        doctorId: String(data.doctorId)
+      };
+      await onSubmit(formattedData);
     }
+  };
+
+  const renderField = (label, name, type = "text", options = null, required = false) => {
+    return (
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">{label} {required && "*"}</Form.Label>
+        </Col>
+        <Col md={6}>
+          {options ? (
+            <Form.Select
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+            >
+              <option value="">Select {label}...</option>
+              {options.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </Form.Select>
+          ) : (
+            <Form.Control
+              type={type}
+              as={type === "textarea" ? "textarea" : "input"}
+              rows={type === "textarea" ? 3 : undefined}
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+              placeholder={`Enter ${label}`}
+            />
+          )}
+          <Form.Control.Feedback type="invalid">
+            {errors[name]?.message}
+          </Form.Control.Feedback>
+        </Col>
+      </Row>
+    );
   };
 
   return (
     <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Test Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("testName", { required: "Test name is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.testName}
-              placeholder="e.g. Complete Blood Count"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.testName?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Test Code *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("testCode", { required: "Test code is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.testCode}
-              placeholder="CBC-001"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Category *</Form.Label>
-            <Form.Select 
-              {...register("category", { required: "Category is required" })} 
-              disabled={!isEditable}
-              isInvalid={!!errors.category}
-            >
-              <option value="">Select Category</option>
-              {CATS.map(c => <option key={c} value={c}>{c}</option>)}
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Ordered Date *</Form.Label>
-            <Form.Control
-              type="date"
-              {...register("orderedDate", { required: "Date is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.orderedDate}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Patient ID *</Form.Label>
-            <Form.Control
-              type="number"
-              {...register("patientId", { required: "Patient ID is required" })}
-              disabled={!isEditable}
-              placeholder="e.g. 1"
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Doctor ID *</Form.Label>
-            <Form.Control
-              type="number"
-              {...register("doctorId", { required: "Doctor ID is required" })}
-              disabled={!isEditable}
-              placeholder="e.g. 1"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Normal Range</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("normalRange")}
-              disabled={!isEditable}
-              placeholder="e.g. 4.0–11.0 × 10³/µL"
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Status</Form.Label>
-            <Form.Select {...register("status")} disabled={!isEditable}>
-              <option value="PENDING">PENDING</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-      </Row>
+      {renderField("Test Name", "testName", "text", null, true)}
+      {renderField("Test Code", "testCode", "text", null, true)}
+      {renderField("Category", "category", "select", 
+        CATS.map(c => ({ value: c, label: c })), 
+        true
+      )}
+      {renderField("Ordered Date", "orderedDate", "date", null, true)}
+      {renderField("Patient ID", "patientId", "text", null, true)}
+      {renderField("Doctor ID", "doctorId", "text", null, true)}
+      {renderField("Normal Range", "normalRange")}
+      {renderField("Status", "status", "select", [
+        { value: "PENDING", label: "PENDING" },
+        { value: "COMPLETED", label: "COMPLETED" },
+        { value: "CANCELLED", label: "CANCELLED" }
+      ])}
 
       {isEditable && (
         <Row className="mt-4">
-          <Col md={12}>
+          <Col md={{ span: 6, offset: 3 }}>
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Saving..." : (isViewMode ? "Update Test" : "Order Test")}

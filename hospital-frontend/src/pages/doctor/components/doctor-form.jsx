@@ -45,142 +45,75 @@ const DoctorForm = ({
     }
   };
 
-  return (
-    <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">First Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("firstName", { required: "First name is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.firstName}
-              placeholder="John"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.firstName?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+  const renderField = (label, name, type = "text", options = null, required = false) => {
+    return (
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">{label} {required && "*"}</Form.Label>
         </Col>
         <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Last Name *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("lastName", { required: "Last name is required" })}
+          {options ? (
+            <Form.Select
+              {...register(name, { required: required ? `${label} is required` : false })}
               disabled={!isEditable}
-              isInvalid={!!errors.lastName}
-              placeholder="Smith"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.lastName?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Specialization *</Form.Label>
+              isInvalid={!!errors[name]}
+            >
+              <option value="">Select {label}...</option>
+              {options.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </Form.Select>
+          ) : (
             <Form.Control
-              type="text"
-              {...register("specialization", { required: "Specialization is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.specialization}
-              placeholder="e.g. Cardiology"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.specialization?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Department *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("department", { required: "Department is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.department}
-              placeholder="e.g. Inpatient"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.department?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Email *</Form.Label>
-            <Form.Control
-              type="email"
-              {...register("email", { 
-                required: "Email is required",
-                pattern: {
+              type={type}
+              {...register(name, { 
+                required: required ? `${label} is required` : false,
+                pattern: type === "email" ? {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                   message: "Invalid email address"
-                }
+                } : undefined
               })}
               disabled={!isEditable}
-              isInvalid={!!errors.email}
-              placeholder="dr.smith@hospital.com"
+              isInvalid={!!errors[name]}
+              placeholder={`Enter ${label}`}
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.email?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Phone *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("phone", { required: "Phone is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.phone}
-              placeholder="+94 77 000 0000"
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.phone?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+          )}
+          <Form.Control.Feedback type="invalid">
+            {errors[name]?.message}
+          </Form.Control.Feedback>
         </Col>
       </Row>
+    );
+  };
 
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">License Number *</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("licenseNumber", { required: "License number is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.licenseNumber}
-              placeholder="MED-12345"
-            />
-          </Form.Group>
+  return (
+    <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
+      {renderField("First Name", "firstName", "text", null, true)}
+      {renderField("Last Name", "lastName", "text", null, true)}
+      {renderField("Specialization", "specialization", "text", null, true)}
+      {renderField("Department", "department", "text", null, true)}
+      {renderField("Email", "email", "email", null, true)}
+      {renderField("Phone", "phone", "text", null, true)}
+      {renderField("License Number", "licenseNumber", "text", null, true)}
+
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">Available</Form.Label>
         </Col>
-        <Col md={6} className="d-flex align-items-end">
-          <Form.Group className="mb-2">
-            <Form.Check 
-              type="checkbox"
-              label="Available for appointments"
-              {...register("available")}
-              disabled={!isEditable}
-              className="fw-bold"
-            />
-          </Form.Group>
+        <Col md={6}>
+          <Form.Check 
+            type="checkbox"
+            label="Available for appointments"
+            {...register("available")}
+            disabled={!isEditable}
+            className="fw-bold"
+          />
         </Col>
       </Row>
 
       {isEditable && (
         <Row className="mt-4">
-          <Col md={12}>
+          <Col md={{ span: 6, offset: 3 }}>
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Saving..." : (isViewMode ? "Update Doctor" : "Add Doctor")}

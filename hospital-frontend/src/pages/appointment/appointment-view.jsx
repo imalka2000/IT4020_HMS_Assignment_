@@ -74,10 +74,10 @@ const AppointmentView = () => {
           <Col md={6}>
             <h4 className="fw-bold mt-2">Appointment #{appointment.id}</h4>
             <span className={`badge ${
-              appointment.appointmentStatus === "COMPLETED" ? "bg-success" : 
-              appointment.appointmentStatus === "SCHEDULED" ? "bg-primary" : "bg-danger"
+              (appointment.status || appointment.appointmentStatus) === "COMPLETED" ? "bg-success" : 
+              (appointment.status || appointment.appointmentStatus) === "SCHEDULED" ? "bg-primary" : "bg-danger"
             }`}>
-              {appointment.appointmentStatus}
+              {appointment.status || appointment.appointmentStatus}
             </span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">

@@ -28,12 +28,12 @@ export default function Appointments({ search: topSearch = "" }) {
   }, []);
 
   const getPatientName = (id) => {
-    const p = patients.find(x => x.id === id);
+    const p = patients.find(x => String(x.id) === String(id));
     return p ? `${p.firstName} ${p.lastName}` : `ID: ${id}`;
   };
 
   const getDoctorName = (id) => {
-    const d = doctors.find(x => x.id === id);
+    const d = doctors.find(x => String(x.id) === String(id));
     return d ? `Dr. ${d.firstName} ${d.lastName}` : `ID: ${id}`;
   };
 
@@ -42,11 +42,12 @@ export default function Appointments({ search: topSearch = "" }) {
   const filtered = items.filter(a => {
     const pName = getPatientName(a.patientId).toLowerCase();
     const dName = getDoctorName(a.doctorId).toLowerCase();
+    const status = (a.status || a.appointmentStatus || "").toLowerCase();
     const search = searchKeyword.toLowerCase();
     const tSearch = topSearch.toLowerCase();
     return (
-      pName.includes(search) || dName.includes(search) || a.appointmentStatus.toLowerCase().includes(search) ||
-      pName.includes(tSearch) || dName.includes(tSearch) || a.appointmentStatus.toLowerCase().includes(tSearch)
+      pName.includes(search) || dName.includes(search) || status.includes(search) ||
+      pName.includes(tSearch) || dName.includes(tSearch) || status.includes(tSearch)
     );
   });
 
@@ -105,35 +106,38 @@ export default function Appointments({ search: topSearch = "" }) {
               <tr><td colSpan={6} className="text-center py-4">Loading appointments...</td></tr>
             ) : filtered.length === 0 ? (
               <tr><td colSpan={6} className="text-center py-4 text-muted">No appointments found.</td></tr>
-            ) : filtered.map(a => (
-              <tr key={a.id}>
-                <td className="fw-bold text-primary">#{a.id}</td>
-                <td><div className="fw-bold">{getPatientName(a.patientId)}</div></td>
-                <td>{getDoctorName(a.doctorId)}</td>
-                <td>
-                  <div>{new Date(a.appointmentDate).toLocaleDateString()}</div>
-                  <div className="small text-muted">{a.appointmentTime}</div>
-                </td>
-                <td>
-                  <span className={`badge ${
-                    a.appointmentStatus === "COMPLETED" ? "bg-success" : 
-                    a.appointmentStatus === "SCHEDULED" ? "bg-primary" : "bg-danger"
-                  }`}>
-                    {a.appointmentStatus}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <Button 
-                    variant="link" 
-                    className="p-0 text-primary me-2" 
-                    onClick={() => navigate(`/appointments/${a.id}`)}
-                    title="View & Edit"
-                  >
-                    <i className="bi bi-eye-fill fs-5"></i>
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            ) : filtered.map(a => {
+              const currentStatus = a.status || a.appointmentStatus || "PENDING";
+              return (
+                <tr key={a.id}>
+                  <td className="fw-bold text-primary">#{a.id}</td>
+                  <td><div className="fw-bold">{getPatientName(a.patientId)}</div></td>
+                  <td>{getDoctorName(a.doctorId)}</td>
+                  <td>
+                    <div>{a.appointmentDate ? new Date(a.appointmentDate).toLocaleDateString() : "-"}</div>
+                    <div className="small text-muted">{a.appointmentTime}</div>
+                  </td>
+                  <td>
+                    <span className={`badge ${
+                      currentStatus === "COMPLETED" ? "bg-success" : 
+                      currentStatus === "SCHEDULED" ? "bg-primary" : "bg-danger"
+                    }`}>
+                      {currentStatus}
+                    </span>
+                  </td>
+                  <td className="text-center">
+                    <Button 
+                      variant="link" 
+                      className="p-0 text-primary me-2" 
+                      onClick={() => navigate(`/appointments/${a.id}`)}
+                      title="View & Edit"
+                    >
+                      <i className="bi bi-eye-fill fs-5"></i>
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       </div>

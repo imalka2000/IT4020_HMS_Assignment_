@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
-import { Form, Button, Row, Col, InputGroup } from "react-bootstrap";
-import { useForm, Controller } from "react-hook-form";
+import { Form, Button, Row, Col } from "react-bootstrap";
+import { useForm } from "react-hook-form";
 
 const defaultValues = {
   patientId: "",
   appointmentId: "",
-  amount: "",
-  status: "PENDING",
-  billingDate: new Date().toISOString().slice(0, 10),
+  totalAmount: 0.0,
+  paymentStatus: "PENDING",
+  invoiceDate: new Date().toISOString().slice(0, 10),
   paymentMethod: "CASH"
 };
 
@@ -17,33 +17,47 @@ const BillsForm = ({
   isViewMode = false,
   isEditable = !isViewMode,
   onCancelEdit = () => {},
-  isLoading = false
+  isLoading = false,
+  patients = [],
+  appointments = []
 }) => {
   const {
     register,
-    control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: defaultValues
   });
+
+  const watchedPatientId = watch("patientId");
+  const filteredAppointments = appointments.filter(a => String(a.patientId) === String(watchedPatientId));
 
   useEffect(() => {
     if (billData && (billData.id || billData.patientId)) {
       reset({
         ...defaultValues,
         ...billData,
-        billingDate: billData.billingDate 
-          ? new Date(billData.billingDate).toISOString().slice(0, 10) 
-          : defaultValues.billingDate
+        invoiceDate: billData.invoiceDate 
+          ? new Date(billData.invoiceDate).toISOString().slice(0, 10) 
+          : defaultValues.invoiceDate,
+        totalAmount: billData.totalAmount !== undefined ? billData.totalAmount : defaultValues.totalAmount,
+        paymentStatus: billData.paymentStatus || defaultValues.paymentStatus
       });
     }
   }, [billData, reset]);
 
   const handleFormSubmit = async (data) => {
     if (onSubmit) {
-      await onSubmit(data);
+      // Ensure IDs are strings and numbers are floats
+      const formattedData = {
+        ...data,
+        patientId: String(data.patientId),
+        appointmentId: data.appointmentId ? String(data.appointmentId) : null,
+        totalAmount: parseFloat(data.totalAmount)
+      };
+      await onSubmit(formattedData);
     }
   };
 
@@ -51,15 +65,21 @@ const BillsForm = ({
     <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
       <Row className="mb-3 align-items-center">
         <Col md={3}>
-          <Form.Label className="mb-0 fw-bold">Patient ID *</Form.Label>
+          <Form.Label className="mb-0 fw-bold">Patient *</Form.Label>
         </Col>
         <Col md={6}>
-          <Form.Control
-            type="number"
-            {...register("patientId", { required: "Patient ID is required" })}
+          <Form.Select
+            {...register("patientId", { required: "Patient is required" })}
             disabled={!isEditable}
             isInvalid={!!errors.patientId}
-          />
+          >
+            <option value="">Select Patient...</option>
+            {patients.map(p => (
+              <option key={p.id} value={p.id}>
+                #{p.id} - {p.firstName} {p.lastName}
+              </option>
+            ))}
+          </Form.Select>
           <Form.Control.Feedback type="invalid">
             {errors.patientId?.message}
           </Form.Control.Feedback>
@@ -68,45 +88,54 @@ const BillsForm = ({
 
       <Row className="mb-3 align-items-center">
         <Col md={3}>
-          <Form.Label className="mb-0 fw-bold">Appointment ID</Form.Label>
+          <Form.Label className="mb-0 fw-bold">Appointment</Form.Label>
         </Col>
         <Col md={6}>
-          <Form.Control
-            type="number"
+          <Form.Select
             {...register("appointmentId")}
-            disabled={!isEditable}
-          />
+            disabled={!isEditable || !watchedPatientId}
+          >
+            <option value="">Select Appointment...</option>
+            {filteredAppointments.map(a => (
+              <option key={a.id} value={a.id}>
+                #{a.id} - {a.reason} ({a.appointmentTime})
+              </option>
+            ))}
+          </Form.Select>
+          {!watchedPatientId && (
+            <Form.Text className="text-muted small">Please select a patient first</Form.Text>
+          )}
         </Col>
       </Row>
 
       <Row className="mb-3 align-items-center">
         <Col md={3}>
-          <Form.Label className="mb-0 fw-bold">Amount (Rs.) *</Form.Label>
+          <Form.Label className="mb-0 fw-bold">Total Amount (Rs.) *</Form.Label>
         </Col>
         <Col md={6}>
           <Form.Control
             type="number"
             step="0.01"
-            {...register("amount", { required: "Amount is required" })}
+            {...register("totalAmount", { required: "Amount is required" })}
             disabled={!isEditable}
-            isInvalid={!!errors.amount}
+            isInvalid={!!errors.totalAmount}
           />
           <Form.Control.Feedback type="invalid">
-            {errors.amount?.message}
+            {errors.totalAmount?.message}
           </Form.Control.Feedback>
         </Col>
       </Row>
 
       <Row className="mb-3 align-items-center">
         <Col md={3}>
-          <Form.Label className="mb-0 fw-bold">Billing Date *</Form.Label>
+          <Form.Label className="mb-0 fw-bold">Invoice Date *</Form.Label>
         </Col>
         <Col md={6}>
           <Form.Control
             type="date"
-            {...register("billingDate", { required: "Date is required" })}
+            {...register("invoiceDate", { required: "Date is required" })}
             disabled={!isEditable}
-            isInvalid={!!errors.billingDate}
+            isInvalid={!!errors.invoiceDate}
           />
         </Col>
       </Row>
@@ -116,7 +145,7 @@ const BillsForm = ({
           <Form.Label className="mb-0 fw-bold">Status</Form.Label>
         </Col>
         <Col md={6}>
-          <Form.Select {...register("status")} disabled={!isEditable}>
+          <Form.Select {...register("paymentStatus")} disabled={!isEditable}>
             <option value="PENDING">PENDING</option>
             <option value="PAID">PAID</option>
             <option value="CANCELLED">CANCELLED</option>

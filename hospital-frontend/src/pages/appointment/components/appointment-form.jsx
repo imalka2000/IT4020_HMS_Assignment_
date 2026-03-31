@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 const defaultValues = {
   patientId: "",
   doctorId: "",
-  appointmentStatus: "SCHEDULED",
+  status: "SCHEDULED",
   appointmentDate: new Date().toISOString().slice(0, 10),
   appointmentTime: "09:00",
   reason: "",
@@ -38,133 +38,84 @@ const AppointmentForm = ({
         ...appointmentData,
         appointmentDate: appointmentData.appointmentDate 
           ? new Date(appointmentData.appointmentDate).toISOString().slice(0, 10) 
-          : defaultValues.appointmentDate
+          : defaultValues.appointmentDate,
+        status: appointmentData.status || appointmentData.appointmentStatus || defaultValues.status
       });
     }
   }, [appointmentData, reset]);
 
   const handleFormSubmit = async (data) => {
     if (onSubmit) {
-      await onSubmit({
+      // Ensure IDs are strings
+      const formattedData = {
         ...data,
-        patientId: parseInt(data.patientId),
-        doctorId: parseInt(data.doctorId)
-      });
+        patientId: String(data.patientId),
+        doctorId: String(data.doctorId)
+      };
+      await onSubmit(formattedData);
     }
+  };
+
+  const renderField = (label, name, type = "text", options = null, required = false) => {
+    return (
+      <Row className="mb-3 align-items-center">
+        <Col md={3}>
+          <Form.Label className="mb-0 fw-bold">{label} {required && "*"}</Form.Label>
+        </Col>
+        <Col md={6}>
+          {options ? (
+            <Form.Select
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+            >
+              <option value="">Select {label}...</option>
+              {options.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </Form.Select>
+          ) : (
+            <Form.Control
+              type={type}
+              as={type === "textarea" ? "textarea" : "input"}
+              rows={type === "textarea" ? 3 : undefined}
+              {...register(name, { required: required ? `${label} is required` : false })}
+              disabled={!isEditable}
+              isInvalid={!!errors[name]}
+              placeholder={`Enter ${label}`}
+            />
+          )}
+          <Form.Control.Feedback type="invalid">
+            {errors[name]?.message}
+          </Form.Control.Feedback>
+        </Col>
+      </Row>
+    );
   };
 
   return (
     <Form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4">
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Patient *</Form.Label>
-            <Form.Select 
-              {...register("patientId", { required: "Patient is required" })} 
-              disabled={!isEditable}
-              isInvalid={!!errors.patientId}
-            >
-              <option value="">Select Patient</option>
-              {patients.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.firstName} {p.lastName} {p.dateOfBirth ? `(${p.dateOfBirth})` : ""}
-                </option>
-              ))}
-            </Form.Select>
-            <Form.Control.Feedback type="invalid">
-              {errors.patientId?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Doctor *</Form.Label>
-            <Form.Select 
-              {...register("doctorId", { required: "Doctor is required" })} 
-              disabled={!isEditable}
-              isInvalid={!!errors.doctorId}
-            >
-              <option value="">Select Doctor</option>
-              {doctors.map(d => (
-                <option key={d.id} value={d.id}>
-                  Dr. {d.firstName} {d.lastName} {d.specialization ? ` — ${d.specialization}` : ""}
-                </option>
-              ))}
-            </Form.Select>
-            <Form.Control.Feedback type="invalid">
-              {errors.doctorId?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Date *</Form.Label>
-            <Form.Control
-              type="date"
-              {...register("appointmentDate", { required: "Date is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.appointmentDate}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Time *</Form.Label>
-            <Form.Control
-              type="time"
-              {...register("appointmentTime", { required: "Time is required" })}
-              disabled={!isEditable}
-              isInvalid={!!errors.appointmentTime}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Status</Form.Label>
-            <Form.Select {...register("appointmentStatus")} disabled={!isEditable}>
-              <option value="SCHEDULED">SCHEDULED</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Reason</Form.Label>
-            <Form.Control
-              type="text"
-              {...register("reason")}
-              disabled={!isEditable}
-              placeholder="Purpose of visit"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={12}>
-          <Form.Group>
-            <Form.Label className="fw-bold">Notes</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              {...register("notes")}
-              disabled={!isEditable}
-              placeholder="Additional notes..."
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+      {renderField("Patient", "patientId", "select", 
+        patients.map(p => ({ value: p.id, label: `${p.firstName} ${p.lastName}` })), 
+        true
+      )}
+      {renderField("Doctor", "doctorId", "select", 
+        doctors.map(d => ({ value: d.id, label: `Dr. ${d.firstName} ${d.lastName}` })), 
+        true
+      )}
+      {renderField("Date", "appointmentDate", "date", null, true)}
+      {renderField("Time", "appointmentTime", "time", null, true)}
+      {renderField("Status", "status", "select", [
+        { value: "SCHEDULED", label: "SCHEDULED" },
+        { value: "COMPLETED", label: "COMPLETED" },
+        { value: "CANCELLED", label: "CANCELLED" }
+      ])}
+      {renderField("Reason", "reason", "text")}
+      {renderField("Notes", "notes", "textarea")}
 
       {isEditable && (
         <Row className="mt-4">
-          <Col md={12}>
+          <Col md={{ span: 6, offset: 3 }}>
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={isLoading}>
                 {isLoading ? "Saving..." : (isViewMode ? "Update Appointment" : "Schedule Appointment")}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Table, Button, Form, InputGroup, Dropdown } from "react-bootstrap";
+import { Table, Button, Form, InputGroup } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { Search, Plus, RotateCcw } from "lucide-react";
 import { billingAPI } from "../../services/api";
@@ -8,14 +8,14 @@ import CardContainer from "../../components/CardContainer";
 
 export default function Bills({ search: topSearch = "" }) {
   const navigate = useNavigate();
-  const { items, loading, error, reload } = useCRUD(useCallback(() => billingAPI.getAll(), []));
+  const { items, loading, reload } = useCRUD(useCallback(() => billingAPI.getAll(), []));
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
   const filtered = items.filter(b => 
-    `${b.patientId} ${b.appointmentId} ${b.status} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${b.patientId} ${b.appointmentId} ${b.status} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
+    `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
   );
 
   const resetFilters = () => {
@@ -82,15 +82,15 @@ export default function Bills({ search: topSearch = "" }) {
                 </td>
                 <td><span className="badge bg-secondary opacity-75">P-{b.patientId}</span></td>
                 <td>{b.appointmentId ? <span className="badge bg-info text-dark opacity-75">A-{b.appointmentId}</span> : "-"}</td>
-                <td className="text-end fw-bold">Rs. {parseFloat(b.amount).toFixed(2)}</td>
-                <td>{new Date(b.billingDate).toLocaleDateString()}</td>
+                <td className="text-end fw-bold">Rs. {parseFloat(b.totalAmount || 0).toFixed(2)}</td>
+                <td>{b.invoiceDate ? new Date(b.invoiceDate).toLocaleDateString() : "-"}</td>
                 <td><span className="small text-uppercase">{b.paymentMethod}</span></td>
                 <td>
                   <span className={`badge ${
-                    b.status === "PAID" ? "bg-success" : 
-                    b.status === "PENDING" ? "bg-warning text-dark" : "bg-danger"
+                    b.paymentStatus === "PAID" ? "bg-success" : 
+                    b.paymentStatus === "PENDING" ? "bg-warning text-dark" : "bg-danger"
                   }`}>
-                    {b.status}
+                    {b.paymentStatus}
                   </span>
                 </td>
                 <td className="text-center">
