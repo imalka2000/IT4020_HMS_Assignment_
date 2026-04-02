@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Dropdown, Row, Col, Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { labAPI } from "../../services/api";
+import { labAPI, patientAPI, doctorAPI } from "../../services/api";
 import LabTestForm from "./components/labtest-form";
 import CardContainer from "../../components/CardContainer";
 
@@ -10,6 +10,8 @@ const LabTestView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,10 +24,16 @@ const LabTestView = () => {
   const fetchTest = async () => {
     setLoading(true);
     try {
-      const data = await labAPI.getById(id);
+      const [data, pData, dData] = await Promise.all([
+        labAPI.getById(id),
+        patientAPI.getAll(),
+        doctorAPI.getAll()
+      ]);
       setTest(data);
+      setPatients(pData);
+      setDoctors(dData);
     } catch (error) {
-      toast.error("Failed to load test details");
+      toast.error("Failed to load details");
     } finally {
       setLoading(false);
     }
@@ -91,6 +99,8 @@ const LabTestView = () => {
 
         <LabTestForm 
           testData={test} 
+          patients={patients}
+          doctors={doctors}
           isViewMode={true} 
           isEditable={isEditable} 
           onCancelEdit={() => setIsEditable(false)}

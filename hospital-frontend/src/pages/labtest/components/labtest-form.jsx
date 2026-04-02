@@ -17,6 +17,8 @@ const defaultValues = {
 
 const LabTestForm = ({
   testData = {},
+  patients = [],
+  doctors = [],
   onSubmit,
   isViewMode = false,
   isEditable = !isViewMode,
@@ -102,8 +104,14 @@ const LabTestForm = ({
         true
       )}
       {renderField("Ordered Date", "orderedDate", "date", null, true)}
-      {renderField("Patient ID", "patientId", "text", null, true)}
-      {renderField("Doctor ID", "doctorId", "text", null, true)}
+      {renderField("Patient", "patientId", "select", 
+        patients.map(p => ({ value: p.id, label: `${p.firstName} ${p.lastName}` })), 
+        true
+      )}
+      {renderField("Doctor", "doctorId", "select", 
+        doctors.map(d => ({ value: d.id, label: `Dr. ${d.firstName} ${d.lastName}` })), 
+        true
+      )}
       {renderField("Normal Range", "normalRange")}
       {renderField("Status", "status", "select", [
         { value: "PENDING", label: "PENDING" },
