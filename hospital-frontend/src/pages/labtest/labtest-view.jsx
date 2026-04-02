@@ -65,7 +65,7 @@ const LabTestView = () => {
         <Row className="mb-3">
           <Col md={6}>
             <h4 className="fw-bold mt-2">{test.testName}</h4>
-            <span className="text-muted small">{test.testCode} · {test.category}</span>
+            <span className="text-muted small"><span className="fw-bold text-primary">#{test.testCode}</span> · {test.category}</span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (

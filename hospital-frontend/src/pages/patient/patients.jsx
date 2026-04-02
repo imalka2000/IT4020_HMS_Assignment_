@@ -14,8 +14,8 @@ export default function Patients({ search: topSearch = "" }) {
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
   const filtered = items.filter(p => 
-    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.id}`.toLowerCase().includes(topSearch.toLowerCase())
+    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.code || ""} ${p.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.code || ""} ${p.id}`.toLowerCase().includes(topSearch.toLowerCase())
   );
 
   const resetFilters = () => {
@@ -76,7 +76,7 @@ export default function Patients({ search: topSearch = "" }) {
               <tr><td colSpan={7} className="text-center py-4 text-muted">No patients found.</td></tr>
             ) : filtered.map(p => (
               <tr key={p.id}>
-                <td className="fw-bold text-primary">#{p.id}</td>
+                <td className="fw-bold text-primary">{p.code || "N/A"}</td>
                 <td>
                   <div className="fw-bold">{p.firstName} {p.lastName}</div>
                   <div className="text-muted small">DOB: {p.dateOfBirth}</div>

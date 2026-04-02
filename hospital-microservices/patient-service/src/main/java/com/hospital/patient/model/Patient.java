@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 public class Patient {
     @Id
     private String id;
+    private String code;
     private String firstName;
     private String lastName;
     @Indexed(unique = true, sparse = true)
@@ -40,6 +41,14 @@ public class Patient {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getFirstName() {

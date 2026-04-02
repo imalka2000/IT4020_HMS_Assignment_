@@ -8,9 +8,16 @@ import java.util.*;
 @Service
 public class LabTestService {
     @Autowired private LabTestRepository repo;
+    @Autowired private SequenceGeneratorService sequenceGenerator;
+
     public List<LabTest> getAll() { return repo.findAll(); }
     public Optional<LabTest> getById(String id) { return repo.findById(id); }
-    public LabTest create(LabTest t) { t.setStatus("ORDERED"); return repo.save(t); }
+
+    public LabTest create(LabTest t) {
+        t.setTestCode("LAB-" + sequenceGenerator.generateSequence(LabTest.class.getSimpleName()));
+        t.setStatus("ORDERED");
+        return repo.save(t);
+    }
     public Optional<LabTest> update(String id, LabTest d) {
         return repo.findById(id).map(t -> {
             t.setPatientId(d.getPatientId()); t.setDoctorId(d.getDoctorId());

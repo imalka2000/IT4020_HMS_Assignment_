@@ -8,9 +8,15 @@ import java.util.*;
 @Service
 public class DoctorService {
     @Autowired private DoctorRepository repo;
+    @Autowired private SequenceGeneratorService sequenceGenerator;
+
     public List<Doctor> getAll() { return repo.findAll(); }
     public Optional<Doctor> getById(String id) { return repo.findById(id); }
-    public Doctor create(Doctor d) { return repo.save(d); }
+
+    public Doctor create(Doctor d) {
+        d.setCode("DOC-" + sequenceGenerator.generateSequence(Doctor.class.getSimpleName()));
+        return repo.save(d);
+    }
     public Optional<Doctor> update(String id, Doctor details) {
         return repo.findById(id).map(d -> {
             d.setFirstName(details.getFirstName()); d.setLastName(details.getLastName());

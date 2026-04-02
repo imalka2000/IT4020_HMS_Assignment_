@@ -10,6 +10,7 @@ import java.util.*;
 public class PharmacyService {
     @Autowired
     private MedicineRepository repo;
+    @Autowired private SequenceGeneratorService sequenceGenerator;
 
     public List<Medicine> getAll() {
         return repo.findAll();
@@ -20,6 +21,7 @@ public class PharmacyService {
     }
 
     public Medicine create(Medicine m) {
+        m.setCode("MED-" + sequenceGenerator.generateSequence(Medicine.class.getSimpleName()));
         return repo.save(m);
     }
 

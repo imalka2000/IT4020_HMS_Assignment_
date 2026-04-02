@@ -14,8 +14,8 @@ export default function Bills({ search: topSearch = "" }) {
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
   const filtered = items.filter(b =>
-    `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
+    `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
   );
 
   const resetFilters = () => {
@@ -77,8 +77,8 @@ export default function Bills({ search: topSearch = "" }) {
               <tr><td colSpan={8} className="text-center py-4 text-muted">No bills found.</td></tr>
             ) : filtered.map(b => (
               <tr key={b.id}>
-                <td className="fw-bold">
-                  <Link to={`/billing/${b.id}`} className="text-decoration-none">#{b.id}</Link>
+                <td className="fw-bold text-primary">
+                  <Link to={`/billing/${b.id}`} className="text-decoration-none">{b.code || "N/A"}</Link>
                 </td>
                 <td>
                   <span className="badge bg-secondary opacity-75">

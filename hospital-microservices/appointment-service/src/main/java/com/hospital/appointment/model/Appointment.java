@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 public class Appointment {
     @Id
     private String id;
+    private String code;
     @Indexed
     private String patientId;
     @Indexed
@@ -39,6 +40,14 @@ public class Appointment {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getPatientId() {

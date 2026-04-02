@@ -65,7 +65,7 @@ const PatientView = () => {
         <Row className="mb-3">
           <Col md={6}>
             <h4 className="fw-bold mt-2">{patient.firstName} {patient.lastName}</h4>
-            <span className="text-muted small">Patient ID: #{patient.id}</span>
+            <span className="text-muted small">Patient ID: #{patient.code || "N/A"}</span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (

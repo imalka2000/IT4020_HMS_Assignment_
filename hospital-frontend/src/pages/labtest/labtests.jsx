@@ -76,10 +76,9 @@ export default function LabTests({ search: topSearch = "" }) {
               <tr><td colSpan={7} className="text-center py-4 text-muted">No tests found.</td></tr>
             ) : filtered.map(t => (
               <tr key={t.id}>
-                <td className="fw-bold text-primary">#{t.id}</td>
+                <td className="fw-bold text-primary">#{t.testCode || "N/A"}</td>
                 <td>
                   <div className="fw-bold">{t.testName}</div>
-                  <div className="text-muted small">Code: {t.testCode}</div>
                 </td>
                 <td><span className="badge bg-secondary opacity-75">{t.category}</span></td>
                 <td><span className="badge bg-info text-dark opacity-75">P-{t.patientId}</span></td>

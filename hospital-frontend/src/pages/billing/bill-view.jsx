@@ -84,7 +84,7 @@ const BillView = () => {
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">Bill #{bill.id}</h4>
+            <h4 className="fw-bold mt-2">Bill #{bill.code || "N/A"}</h4>
           </Col>
           <Col md={6} className="d-flex justify-content-end">
             {!isEditable && (
@@ -125,7 +125,7 @@ const BillView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete bill <b>#{bill.id}</b>?
+          Are you sure you want to delete bill <b>#{bill.code || "N/A"}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>

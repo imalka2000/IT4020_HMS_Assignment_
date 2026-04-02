@@ -47,7 +47,9 @@ export default function Appointments({ search: topSearch = "" }) {
     const tSearch = topSearch.toLowerCase();
     return (
       pName.includes(search) || dName.includes(search) || status.includes(search) ||
-      pName.includes(tSearch) || dName.includes(tSearch) || status.includes(tSearch)
+      (a.code || "").toLowerCase().includes(search) ||
+      pName.includes(tSearch) || dName.includes(tSearch) || status.includes(tSearch) ||
+      (a.code || "").toLowerCase().includes(tSearch)
     );
   });
 
@@ -110,7 +112,7 @@ export default function Appointments({ search: topSearch = "" }) {
               const currentStatus = a.status || a.appointmentStatus || "PENDING";
               return (
                 <tr key={a.id}>
-                  <td className="fw-bold text-primary">#{a.id}</td>
+                  <td className="fw-bold text-primary">{a.code || "N/A"}</td>
                   <td><div className="fw-bold">{getPatientName(a.patientId)}</div></td>
                   <td>{getDoctorName(a.doctorId)}</td>
                   <td>

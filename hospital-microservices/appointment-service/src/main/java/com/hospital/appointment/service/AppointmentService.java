@@ -8,9 +8,16 @@ import java.util.*;
 @Service
 public class AppointmentService {
     @Autowired private AppointmentRepository repo;
+    @Autowired private SequenceGeneratorService sequenceGenerator;
+
     public List<Appointment> getAll() { return repo.findAll(); }
     public Optional<Appointment> getById(String id) { return repo.findById(id); }
-    public Appointment create(Appointment a) { a.setStatus("SCHEDULED"); return repo.save(a); }
+
+    public Appointment create(Appointment a) {
+        a.setCode("APT-" + sequenceGenerator.generateSequence(Appointment.class.getSimpleName()));
+        a.setStatus("SCHEDULED");
+        return repo.save(a);
+    }
     public Optional<Appointment> update(String id, Appointment d) {
         return repo.findById(id).map(a -> {
             a.setPatientId(d.getPatientId()); a.setDoctorId(d.getDoctorId());

@@ -14,8 +14,8 @@ export default function Doctors({ search: topSearch = "" }) {
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
   const filtered = items.filter(d => 
-    `${d.firstName} ${d.lastName} ${d.specialization} ${d.department} ${d.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${d.firstName} ${d.lastName} ${d.specialization} ${d.department} ${d.id}`.toLowerCase().includes(topSearch.toLowerCase())
+    `${d.firstName} ${d.lastName} ${d.specialization} ${d.department} ${d.code || ""} ${d.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    `${d.firstName} ${d.lastName} ${d.specialization} ${d.department} ${d.code || ""} ${d.id}`.toLowerCase().includes(topSearch.toLowerCase())
   );
 
   const resetFilters = () => {
@@ -76,7 +76,7 @@ export default function Doctors({ search: topSearch = "" }) {
               <tr><td colSpan={7} className="text-center py-4 text-muted">No doctors found.</td></tr>
             ) : filtered.map(d => (
               <tr key={d.id}>
-                <td className="fw-bold text-primary">#{d.id}</td>
+                <td className="fw-bold text-primary">{d.code || "N/A"}</td>
                 <td>
                   <div className="fw-bold">{d.firstName} {d.lastName}</div>
                   <div className="text-muted small">License: {d.licenseNumber}</div>

@@ -10,6 +10,7 @@ import java.util.*;
 public class BillingService {
     @Autowired
     private InvoiceRepository repo;
+    @Autowired private SequenceGeneratorService sequenceGenerator;
 
     public List<Invoice> getAll() {
         return repo.findAll();
@@ -28,6 +29,8 @@ public class BillingService {
         }
         if (inv.getPaymentStatus() == null)
             inv.setPaymentStatus("PENDING");
+        
+        inv.setCode("INV-" + sequenceGenerator.generateSequence(Invoice.class.getSimpleName()));
         return repo.save(inv);
     }
 

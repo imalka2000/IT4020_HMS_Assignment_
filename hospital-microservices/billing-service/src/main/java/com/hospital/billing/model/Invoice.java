@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 public class Invoice {
     @Id
     private String id;
+    private String code;
     @Indexed
     private String patientId;
     private String appointmentId;
@@ -43,6 +44,14 @@ public class Invoice {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getPatientId() {

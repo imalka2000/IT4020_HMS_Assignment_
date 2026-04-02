@@ -65,7 +65,9 @@ const DoctorView = () => {
         <Row className="mb-3">
           <Col md={6}>
             <h4 className="fw-bold mt-2">Dr. {doctor.firstName} {doctor.lastName}</h4>
-            <span className="text-muted small">{doctor.specialization} · {doctor.department}</span>
+            <div className="text-muted small">
+              <span className="fw-bold text-primary">#{doctor.code || "N/A"}</span> · {doctor.specialization} · {doctor.department}
+            </div>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
             {!isEditable && (

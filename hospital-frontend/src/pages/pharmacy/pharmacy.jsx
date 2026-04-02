@@ -14,8 +14,8 @@ export default function Pharmacy({ search: topSearch = "" }) {
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
   const filtered = items.filter(m => 
-    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer}`.toLowerCase().includes(topSearch.toLowerCase())
+    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer} ${m.code || ""} ${m.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer} ${m.code || ""} ${m.id}`.toLowerCase().includes(topSearch.toLowerCase())
   );
 
   const resetFilters = () => {
@@ -76,7 +76,7 @@ export default function Pharmacy({ search: topSearch = "" }) {
               <tr><td colSpan={7} className="text-center py-4 text-muted">No medicines found.</td></tr>
             ) : filtered.map(m => (
               <tr key={m.id}>
-                <td className="fw-bold text-primary">#{m.id}</td>
+                <td className="fw-bold text-primary">{m.code || "N/A"}</td>
                 <td>
                   <div className="fw-bold">{m.name}</div>
                   <div className="text-muted small">{m.genericName || "Generic N/A"}</div>

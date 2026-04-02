@@ -72,7 +72,7 @@ const AppointmentView = () => {
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">Appointment #{appointment.id}</h4>
+            <h4 className="fw-bold mt-2">Appointment #{appointment.code || "N/A"}</h4>
             <span className={`badge ${
               (appointment.status || appointment.appointmentStatus) === "COMPLETED" ? "bg-success" : 
               (appointment.status || appointment.appointmentStatus) === "SCHEDULED" ? "bg-primary" : "bg-danger"
@@ -119,7 +119,7 @@ const AppointmentView = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete appointment <b>#{appointment.id}</b>?
+          Are you sure you want to delete appointment <b>#{appointment.code || "N/A"}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>

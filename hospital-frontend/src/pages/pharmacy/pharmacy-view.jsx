@@ -64,7 +64,7 @@ const PharmacyView = () => {
       <CardContainer>
         <Row className="mb-3">
           <Col md={6}>
-            <h4 className="fw-bold mt-2">{medicine.name}</h4>
+            <h4 className="fw-bold mt-2">{medicine.name} <span className="text-primary fs-6 fw-normal">#{medicine.code || "N/A"}</span></h4>
             <span className="text-muted small">{medicine.genericName} · {medicine.category}</span>
           </Col>
           <Col md={6} className="d-flex justify-content-end align-items-center">
