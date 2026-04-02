@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const [counts, setCounts]       = useState({});
   const [appointments, setAppts]  = useState([]);
-  const [doctors, setDoctors]     = useState([]);
+  const [allPatients, setAllPatients] = useState([]);
+  const [allDoctors, setAllDoctors] = useState([]);
   const [loading, setLoading]     = useState(true);
   const navigate = useNavigate();
 
@@ -25,8 +26,11 @@ export default function Dashboard() {
       if (results[2].status === "fulfilled") {
         setAppts((results[2].value || []).slice(0, 7));
       }
+      if (results[0].status === "fulfilled") {
+        setAllPatients(results[0].value || []);
+      }
       if (results[1].status === "fulfilled") {
-        setDoctors((results[1].value || []).slice(0, 5));
+        setAllDoctors(results[1].value || []);
       }
       setLoading(false);
     });
@@ -40,6 +44,16 @@ export default function Dashboard() {
     { label: "Invoices",     value: counts.invoices,     icon: Receipt,      accent: "var(--orange)", link: "/billing" },
     { label: "Lab Tests",    value: counts.labtests,     icon: FlaskConical, accent: "var(--green)",  link: "/labtests" },
   ];
+
+  const getPatientName = (id) => {
+    const p = allPatients.find(x => String(x.id) === String(id));
+    return p ? `${p.firstName} ${p.lastName}` : `P-${id?.slice(-4) || "…"}`;
+  };
+
+  const getDoctorName = (id) => {
+    const d = allDoctors.find(x => String(x.id) === String(id));
+    return d ? `Dr. ${d.firstName} ${d.lastName}` : `D-${id?.slice(-4) || "…"}`;
+  };
 
   const statusBadge = (s) => {
     if (!s) return <span className="badge badge-grey">—</span>;
@@ -63,7 +77,37 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ── Two-column layout like mockup ── */}
+      {/* ── Hospital Statistics (Charts) ── */}
+      <div className="card mb-4" style={{ marginBottom:20 }}>
+        <div className="card-header border-0 bg-transparent">
+          <div className="card-title" style={{ fontSize:16 }}>Hospital Insights</div>
+        </div>
+        <div className="card-body" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:30, padding:"0 20px 25px" }}>
+          {[
+            { label: "Active Consultations", count: counts.appointments, total: counts.patients, color: "var(--orange)" },
+            { label: "Lab Performance", count: counts.labtests, total: counts.appointments, color: "var(--green)" },
+            { label: "Revenue Cycle", count: counts.invoices, total: counts.appointments, color: "var(--blue)" }
+          ].map(stat => {
+            const perc = Math.min(100, Math.round((stat.count / (stat.total || 1)) * 100));
+            return (
+              <div key={stat.label}>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, fontSize:13, fontWeight:600 }}>
+                  <span>{stat.label}</span>
+                  <span style={{ color:stat.color }}>{perc}%</span>
+                </div>
+                <div style={{ height:8, background:"#f0f2f5", borderRadius:10, overflow:"hidden" }}>
+                  <div style={{ width:`${perc}%`, height:"100%", background:stat.color, borderRadius:10, transition:"width 1s ease-in-out" }} />
+                </div>
+                <div style={{ marginTop:8, fontSize:11, color:"var(--text-muted)" }}>
+                  {stat.count} of {stat.total || 0} relative records
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Two-column layout ── */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:18, alignItems:"start" }}>
 
         {/* Left: Today's Appointments table */}
@@ -83,8 +127,8 @@ export default function Dashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>Patient ID</th>
-                  <th>Doctor ID</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
                   <th>Time</th>
                   <th>Reason</th>
                   <th>Status</th>
@@ -92,7 +136,8 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className="loading"><Clock size={16} />Loading…</td></tr>
+                  <tr>
+                    <td colSpan={5} className="loading"><Clock size={16} />Loading…</td></tr>
                 ) : appointments.length === 0 ? (
                   <tr><td colSpan={5}>
                     <div className="empty-state" style={{ padding:"28px 16px" }}>
@@ -103,8 +148,8 @@ export default function Dashboard() {
                   </td></tr>
                 ) : appointments.map(a => (
                   <tr key={a.id}>
-                    <td className="td-mono">P-{a.patientId}</td>
-                    <td className="td-mono">D-{a.doctorId}</td>
+                    <td style={{ fontSize:13, fontWeight:600 }}>{getPatientName(a.patientId)}</td>
+                    <td style={{ fontSize:12, color:"var(--text-mid)" }}>{getDoctorName(a.doctorId)}</td>
                     <td style={{ fontSize:12, fontWeight:600 }}>
                       {a.appointmentTime || "—"}
                     </td>
@@ -145,14 +190,14 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-header">
               <span className="card-title">Doctor Availability</span>
-              <span style={{ fontSize:11, color:"var(--text-muted)" }}>{doctors.filter(d=>d.available).length} online</span>
+              <span style={{ fontSize:11, color:"var(--text-muted)" }}>{allDoctors.filter(d=>d.available).length} online</span>
             </div>
             <div className="card-body" style={{ padding:"10px 16px" }}>
               {loading ? (
                 <div style={{ padding:16, textAlign:"center", color:"var(--text-muted)", fontSize:13 }}>Loading…</div>
-              ) : doctors.length === 0 ? (
+              ) : allDoctors.length === 0 ? (
                 <div style={{ padding:12, textAlign:"center", color:"var(--text-muted)", fontSize:12 }}>No doctors registered yet.</div>
-              ) : doctors.map(d => (
+              ) : allDoctors.map(d => (
                 <div key={d.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 0", borderBottom:"1px solid var(--sky)" }}>
                   <div className={`avail-dot ${d.available ? "online" : "offline"}`} />
                   <div style={{ flex:1 }}>
