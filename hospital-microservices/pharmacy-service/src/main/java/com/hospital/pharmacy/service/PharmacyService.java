@@ -10,7 +10,8 @@ import java.util.*;
 public class PharmacyService {
     @Autowired
     private MedicineRepository repo;
-    @Autowired private SequenceGeneratorService sequenceGenerator;
+    @Autowired
+    private SequenceGeneratorService sequenceGenerator;
 
     public List<Medicine> getAll() {
         return repo.findAll();

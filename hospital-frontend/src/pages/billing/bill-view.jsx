@@ -27,7 +27,7 @@ const BillView = () => {
       const [billData, pData, aData] = await Promise.all([
         billingAPI.getById(id),
         patientAPI.getAll(),
-        appointmentAPI.getAll()
+        appointmentAPI.getAll(),
       ]);
       setBill(billData);
       setPatients(pData);
@@ -46,11 +46,17 @@ const BillView = () => {
 
       // If appointment ID is provided/changed, mark it as completed
       if (data.appointmentId) {
-        const appointment = appointments.find(a => String(a.id) === String(data.appointmentId));
-        if (appointment && (appointment.status !== "COMPLETED" && appointment.appointmentStatus !== "COMPLETED")) {
+        const appointment = appointments.find(
+          (a) => String(a.id) === String(data.appointmentId),
+        );
+        if (
+          appointment &&
+          appointment.status !== "COMPLETED" &&
+          appointment.appointmentStatus !== "COMPLETED"
+        ) {
           await appointmentAPI.update(data.appointmentId, {
             ...appointment,
-            status: "COMPLETED"
+            status: "COMPLETED",
           });
         }
       }
@@ -76,7 +82,8 @@ const BillView = () => {
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading bill details...</div>;
+  if (loading)
+    return <div className="p-4 text-center">Loading bill details...</div>;
   if (!bill) return <div className="p-4 text-center">Bill not found</div>;
 
   return (
@@ -89,7 +96,10 @@ const BillView = () => {
           <Col md={6} className="d-flex justify-content-end">
             {!isEditable && (
               <Dropdown align="end">
-                <Dropdown.Toggle variant="white" className="border-0 p-0 shadow-none">
+                <Dropdown.Toggle
+                  variant="white"
+                  className="border-0 p-0 shadow-none"
+                >
                   <i className="bi bi-three-dots-vertical fs-5"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
@@ -99,7 +109,10 @@ const BillView = () => {
                   <Dropdown.Item onClick={() => setIsEditable(true)}>
                     <i className="bi bi-pencil-square me-2"></i> Edit
                   </Dropdown.Item>
-                  <Dropdown.Item className="text-danger" onClick={() => setShowDeleteModal(true)}>
+                  <Dropdown.Item
+                    className="text-danger"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
                     <i className="bi bi-trash-fill me-2"></i> Delete
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -108,10 +121,10 @@ const BillView = () => {
           </Col>
         </Row>
 
-        <BillsForm 
-          billData={bill} 
-          isViewMode={true} 
-          isEditable={isEditable} 
+        <BillsForm
+          billData={bill}
+          isViewMode={true}
+          isEditable={isEditable}
           onCancelEdit={() => setIsEditable(false)}
           onSubmit={handleUpdate}
           isLoading={isSaving}
@@ -120,7 +133,11 @@ const BillView = () => {
         />
       </CardContainer>
 
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
@@ -128,8 +145,12 @@ const BillView = () => {
           Are you sure you want to delete bill <b>#{bill.code || "N/A"}</b>?
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDelete}>Delete</Button>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
         </Modal.Footer>
       </Modal>
 

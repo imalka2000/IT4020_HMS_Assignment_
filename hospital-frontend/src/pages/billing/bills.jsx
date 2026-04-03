@@ -8,14 +8,21 @@ import CardContainer from "../../components/CardContainer";
 
 export default function Bills({ search: topSearch = "" }) {
   const navigate = useNavigate();
-  const { items, loading, reload } = useCRUD(useCallback(() => billingAPI.getAll(), []));
+  const { items, loading, reload } = useCRUD(
+    useCallback(() => billingAPI.getAll(), []),
+  );
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(b =>
-    `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase().includes(topSearch.toLowerCase())
+  const filtered = items.filter(
+    (b) =>
+      `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`
+        .toLowerCase()
+        .includes(searchKeyword.toLowerCase()) ||
+      `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`
+        .toLowerCase()
+        .includes(topSearch.toLowerCase()),
   );
 
   const resetFilters = () => {
@@ -28,13 +35,24 @@ export default function Bills({ search: topSearch = "" }) {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h4 className="fw-bold mb-0">Bills</h4>
-          <p className="text-muted small mb-0">Manage hospital invoices and payments</p>
+          <p className="text-muted small mb-0">
+            Manage hospital invoices and payments
+          </p>
         </div>
         <div className="d-flex gap-2 align-items-center">
-          <Button variant="link" className="p-0 text-dark text-decoration-none d-flex align-items-center gap-1" onClick={resetFilters}>
+          <Button
+            variant="link"
+            className="p-0 text-dark text-decoration-none d-flex align-items-center gap-1"
+            onClick={resetFilters}
+          >
             <RotateCcw size={14} /> Reset
           </Button>
-          <Button as={Link} to="/billing/create" variant="primary" className="d-flex align-items-center gap-1">
+          <Button
+            as={Link}
+            to="/billing/create"
+            variant="primary"
+            className="d-flex align-items-center gap-1"
+          >
             <Plus size={16} /> Create New Bill
           </Button>
         </div>
@@ -72,42 +90,81 @@ export default function Bills({ search: topSearch = "" }) {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="text-center py-4">Loading bills...</td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan={8} className="text-center py-4 text-muted">No bills found.</td></tr>
-            ) : filtered.map(b => (
-              <tr key={b.id}>
-                <td className="fw-bold text-primary">
-                  <Link to={`/billing/${b.id}`} className="text-decoration-none">{b.code || "N/A"}</Link>
-                </td>
-                <td>
-                  <span className="badge bg-secondary opacity-75">
-                    P-{b.patientId}
-                  </span>
-                </td>
-                <td>{b.appointmentId ? <span className="badge bg-info text-dark opacity-75">A-{b.appointmentId}</span> : "-"}</td>
-                <td className="text-end fw-bold">Rs. {parseFloat(b.totalAmount || 0).toFixed(2)}</td>
-                <td>{b.invoiceDate ? new Date(b.invoiceDate).toLocaleDateString() : "-"}</td>
-                <td><span className="small text-uppercase">{b.paymentMethod}</span></td>
-                <td>
-                  <span className={`badge ${b.paymentStatus === "PAID" ? "bg-success" :
-                    b.paymentStatus === "PENDING" ? "bg-warning text-dark" : "bg-danger"
-                    }`}>
-                    {b.paymentStatus}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <Button
-                    variant="link"
-                    className="p-0 text-primary me-2"
-                    onClick={() => navigate(`/billing/${b.id}`)}
-                    title="View & Edit"
-                  >
-                    <i className="bi bi-eye-fill fs-5"></i>
-                  </Button>
+              <tr>
+                <td colSpan={8} className="text-center py-4">
+                  Loading bills...
                 </td>
               </tr>
-            ))}
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-4 text-muted">
+                  No bills found.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((b) => (
+                <tr key={b.id}>
+                  <td className="fw-bold text-primary">
+                    <Link
+                      to={`/billing/${b.id}`}
+                      className="text-decoration-none"
+                    >
+                      {b.code || "N/A"}
+                    </Link>
+                  </td>
+                  <td>
+                    <span className="badge bg-secondary opacity-75">
+                      P-{b.patientId}
+                    </span>
+                  </td>
+                  <td>
+                    {b.appointmentId ? (
+                      <span className="badge bg-info text-dark opacity-75">
+                        A-{b.appointmentId}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className="text-end fw-bold">
+                    Rs. {parseFloat(b.totalAmount || 0).toFixed(2)}
+                  </td>
+                  <td>
+                    {b.invoiceDate
+                      ? new Date(b.invoiceDate).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td>
+                    <span className="small text-uppercase">
+                      {b.paymentMethod}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        b.paymentStatus === "PAID"
+                          ? "bg-success"
+                          : b.paymentStatus === "PENDING"
+                            ? "bg-warning text-dark"
+                            : "bg-danger"
+                      }`}
+                    >
+                      {b.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="text-center">
+                    <Button
+                      variant="link"
+                      className="p-0 text-primary me-2"
+                      onClick={() => navigate(`/billing/${b.id}`)}
+                      title="View & Edit"
+                    >
+                      <i className="bi bi-eye-fill fs-5"></i>
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </Table>
       </div>

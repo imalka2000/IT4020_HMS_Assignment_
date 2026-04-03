@@ -16,7 +16,7 @@ const BillCreate = () => {
       try {
         const [pData, aData] = await Promise.all([
           patientAPI.getAll(),
-          appointmentAPI.getAll()
+          appointmentAPI.getAll(),
         ]);
         setPatients(pData);
         setAppointments(aData);
@@ -34,16 +34,20 @@ const BillCreate = () => {
 
       // After bill created, update appointment status if exists
       if (data.appointmentId) {
-        const appointment = appointments.find(a => String(a.id) === String(data.appointmentId));
+        const appointment = appointments.find(
+          (a) => String(a.id) === String(data.appointmentId),
+        );
         if (appointment) {
           await appointmentAPI.update(data.appointmentId, {
             ...appointment,
-            status: "COMPLETED"
+            status: "COMPLETED",
           });
         }
       }
 
-      toast.success("Bill created successfully and Appointment marked as Completed");
+      toast.success(
+        "Bill created successfully and Appointment marked as Completed",
+      );
       setTimeout(() => navigate("/billing"), 1500);
     } catch (error) {
       toast.error(error.message || "Failed to create bill");

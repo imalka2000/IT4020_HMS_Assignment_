@@ -38,13 +38,25 @@ public class LabTestController {
     @GetMapping("/patient/{pid}") @Operation(summary="Tests by patient")
     public ResponseEntity<List<LabTest>> byPatient(@PathVariable String pid) {
         return ResponseEntity.ok(svc.byPatient(pid)); }
-    @GetMapping("/doctor/{did}") @Operation(summary="Tests by doctor")
-    public ResponseEntity<List<LabTest>> byDoctor(@PathVariable String did) {
-        return ResponseEntity.ok(svc.byDoctor(did)); }
-    @GetMapping("/status") @Operation(summary="Tests by status")
-    public ResponseEntity<List<LabTest>> byStatus(@RequestParam String status) {
-        return ResponseEntity.ok(svc.byStatus(status)); }
-    @GetMapping("/category/{cat}") @Operation(summary="Tests by category")
-    public ResponseEntity<List<LabTest>> byCategory(@PathVariable String cat) {
-        return ResponseEntity.ok(svc.byCategory(cat)); }
+    
+    @GetMapping("/doctor/{did}") 
+    @Operation(summary="Tests by doctor")
+    public ResponseEntity<List<LabTest>> byDoctor(@PathVariable String did) 
+    {
+        return ResponseEntity.ok(svc.byDoctor(did)); 
+        }
+   
+    @GetMapping("/status") 
+    @Operation(summary="Tests by status")
+    public ResponseEntity<List<LabTest>> byStatus(@RequestParam String status) 
+    {
+        return ResponseEntity.ok(svc.byStatus(status)); 
+        }
+    
+    @GetMapping("/category/{cat}") 
+    @Operation(summary="Tests by category")
+    public ResponseEntity<List<LabTest>> byCategory(@PathVariable String cat) 
+    {
+        return ResponseEntity.ok(svc.byCategory(cat)); 
+    }
 }
