@@ -13,10 +13,12 @@ export default function Pharmacy({ search: topSearch = "" }) {
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(m => 
-    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer} ${m.code || ""} ${m.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${m.name} ${m.genericName} ${m.category} ${m.manufacturer} ${m.code || ""} ${m.id}`.toLowerCase().includes(topSearch.toLowerCase())
-  );
+  const filtered = items.filter(m => {
+    const searchStr = `${m.name} ${m.genericName} ${m.category} ${m.manufacturer} ${m.code || ""} ${m.id}`.toLowerCase();
+    const matchesSearch = !searchKeyword ? true : searchStr.includes(searchKeyword.toLowerCase());
+    const matchesTopSearch = !topSearch ? true : searchStr.includes(topSearch.toLowerCase());
+    return matchesSearch && matchesTopSearch;
+  });
 
   const resetFilters = () => {
     setSearchKeyword("");

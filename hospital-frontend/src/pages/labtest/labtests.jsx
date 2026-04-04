@@ -13,10 +13,12 @@ export default function LabTests({ search: topSearch = "" }) {
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(t => 
-    `${t.testName} ${t.testCode} ${t.category} ${t.status} ${t.patientId}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${t.testName} ${t.testCode} ${t.category} ${t.status} ${t.patientId}`.toLowerCase().includes(topSearch.toLowerCase())
-  );
+  const filtered = items.filter(t => {
+    const searchStr = `${t.testName} ${t.testCode} ${t.category} ${t.status} ${t.patientId}`.toLowerCase();
+    const matchesSearch = !searchKeyword ? true : searchStr.includes(searchKeyword.toLowerCase());
+    const matchesTopSearch = !topSearch ? true : searchStr.includes(topSearch.toLowerCase());
+    return matchesSearch && matchesTopSearch;
+  });
 
   const resetFilters = () => {
     setSearchKeyword("");

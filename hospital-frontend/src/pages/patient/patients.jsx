@@ -13,10 +13,12 @@ export default function Patients({ search: topSearch = "" }) {
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(p => 
-    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.code || ""} ${p.id}`.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-    `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.code || ""} ${p.id}`.toLowerCase().includes(topSearch.toLowerCase())
-  );
+  const filtered = items.filter(p => {
+    const searchStr = `${p.firstName} ${p.lastName} ${p.email} ${p.phone} ${p.code || ""} ${p.id}`.toLowerCase();
+    const matchesSearch = !searchKeyword ? true : searchStr.includes(searchKeyword.toLowerCase());
+    const matchesTopSearch = !topSearch ? true : searchStr.includes(topSearch.toLowerCase());
+    return matchesSearch && matchesTopSearch;
+  });
 
   const resetFilters = () => {
     setSearchKeyword("");

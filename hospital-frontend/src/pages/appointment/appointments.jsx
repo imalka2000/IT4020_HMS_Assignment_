@@ -45,12 +45,18 @@ export default function Appointments({ search: topSearch = "" }) {
     const status = (a.status || a.appointmentStatus || "").toLowerCase();
     const search = searchKeyword.toLowerCase();
     const tSearch = topSearch.toLowerCase();
-    return (
+    
+    const matchesSearch = !search ? true : (
       pName.includes(search) || dName.includes(search) || status.includes(search) ||
-      (a.code || "").toLowerCase().includes(search) ||
+      (a.code || "").toLowerCase().includes(search)
+    );
+    
+    const matchesTopSearch = !tSearch ? true : (
       pName.includes(tSearch) || dName.includes(tSearch) || status.includes(tSearch) ||
       (a.code || "").toLowerCase().includes(tSearch)
     );
+    
+    return matchesSearch && matchesTopSearch;
   });
 
   const resetFilters = () => {

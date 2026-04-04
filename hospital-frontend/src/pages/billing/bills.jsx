@@ -15,15 +15,12 @@ export default function Bills({ search: topSearch = "" }) {
 
   const handleSearch = (e) => setSearchKeyword(e.target.value);
 
-  const filtered = items.filter(
-    (b) =>
-      `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`
-        .toLowerCase()
-        .includes(searchKeyword.toLowerCase()) ||
-      `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`
-        .toLowerCase()
-        .includes(topSearch.toLowerCase()),
-  );
+  const filtered = items.filter((b) => {
+    const searchStr = `${b.code || ""} ${b.patientId} ${b.appointmentId} ${b.paymentStatus} ${b.paymentMethod}`.toLowerCase();
+    const matchesSearch = !searchKeyword ? true : searchStr.includes(searchKeyword.toLowerCase());
+    const matchesTopSearch = !topSearch ? true : searchStr.includes(topSearch.toLowerCase());
+    return matchesSearch && matchesTopSearch;
+  });
 
   const resetFilters = () => {
     setSearchKeyword("");
